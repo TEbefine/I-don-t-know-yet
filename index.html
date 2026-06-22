@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&family=Noto+Serif+Display:ital@0;1&family=Noto+Sans+Thai:wght@300;400;500&family=Noto+Serif+Thai:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- ════════════════════════════════════════════════════════════
+     ✏️  EDIT YOUR STORY HERE  — แก้เรื่องราว / รูป / เพลง ตรงนี้ที่เดียว
+     ทุกอย่างอยู่ในไฟล์เดียวแล้ว ไม่มีไฟล์ js แยก
+     - รูปหลัก: ใส่ชื่อไฟล์รูปที่ heroImage (ต้องตรงตัวพิมพ์ใหญ่/เล็กเป๊ะ)
+     - blocks: ก๊อปบรรทัดมาวาง แล้วแก้ข้อความ คั่นด้วยคอมมา ,
+         { type:"text",  body:"..." }
+         { type:"quote", body:"...", by:"— me" }
+         { type:"image", src:"photo.png", caption:"..." }
+         { type:"music", url:"spotify หรือ youtube link" }
+     เซฟ → เปิด index.html ใหม่ (Cmd+Shift+R)
+     ════════════════════════════════════════════════════════════ -->
+<script>
+const MY_SPACE = {
+
+  title:    "Sap",
+  subtitle: "คืนที่เบาที่สุด — ฉากแรก",
+  signature: "SAP by Teera",
+
+  heroImage:   "SAP-01.png",                 // ← ชื่อไฟล์รูป (ตรงตัวพิมพ์เป๊ะ)
+  heroCaption: "ห้องเล็ก ๆ ที่หายใจได้",
+
+  blocks: [
+    { type: "text",
+      body: "คืนนี้ฟ้าข้างนอกเป็นสีคราม\nSap นั่งอยู่ริมหน้าต่าง ในห้องที่ไม่มีอะไรมาก — เตียงต่ำหนึ่งหลัง โต๊ะไม้หนึ่งตัว และแสงไฟดวงเดียวที่อุ่นพอจะเรียกว่าบ้าน" },
+
+    { type: "text",
+      body: "เขาไม่ได้หนีจากโลก เขาแค่ค้นพบว่า โลกทั้งใบใส่ลงในห้องเล็ก ๆ ได้ — ถ้าเลือกเก็บไว้เฉพาะสิ่งที่ทำให้ใจเต้นช้าลง" },
+
+    { type: "text",
+      body: "ตรงขอบหน้าต่าง มีถาดต้นอ่อนเรียงกันเป็นแถว เขียวอ่อนจนเกือบโปร่งแสง\nSap ยกบัวรดน้ำใบเล็ก เอียงมือช้า ๆ น้ำหยดลงดินทีละเม็ด เหมือนเวลายอมเดินช้าลงเพื่อเขา" },
+
+    { type: "quote",
+      body: "งานที่เรารัก ไม่เคยทำให้เราเหนื่อย เท่ากับงานที่เราต้องแกล้งรัก",
+      by: "— Sap" },
+
+    { type: "text",
+      body: "ที่นี่ การพักผ่อนกับการทำงาน ไม่ใช่คนละฝั่งของวัน\nมันคือสิ่งเดียวกัน — Sap พักไปพร้อมกับดูแลต้นกล้า และต้นกล้าก็ค่อย ๆ โตขึ้น พร้อมกับที่ใจเขาคลายลง" },
+
+    { type: "text",
+      body: "ข้างนอกหน้าต่าง ดาวค่อย ๆ ติดขึ้นทีละดวง ฟ้าเปลี่ยนจากครามเป็นม่วงจาง\nSap ไม่รีบไปไหน คืนนี้ไม่มีอะไรต้องไล่ตาม มีแค่ต้นอ่อน ลมหายใจ และฟ้าที่สวยจนไม่ต้องอธิบาย" },
+
+    { type: "text",
+      body: "ก่อนจะหลับ เขามองต้นกล้าอีกครั้ง แล้วยิ้มบาง ๆ\n“พรุ่งนี้พวกเธอจะสูงขึ้นอีกนิด”\n— และเขารู้ว่า ตัวเขาเองก็เช่นกัน" }
+  ]
+};
+</script>
+
+<style>
+  :root {
+    --ink:        #2a2a2e;
+    --ink-soft:   #565660;
+    --ink-faint:  rgba(42,42,46,0.5);
+    --paper:      #faf7f4;
+    --panel:      rgba(250,247,244,0.62);
+    --hair:       rgba(42,42,46,0.10);
+    --sage:       #6B9080;
+
+    --space-3: 16px; --space-4: 24px; --space-5: 32px;
+    --space-6: 48px; --space-7: 64px; --space-8: 96px; --space-9: 160px;
+    --measure: 600px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --mono:  "IBM Plex Mono", ui-monospace, monospace;
+    --sans:  "Inter", "Noto Sans Thai", system-ui, sans-serif;
+    --serif: "Noto Serif Display", "Noto Serif Thai", Georgia, serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* living gradient */
+  #gradient { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; display: block; }
+  #veil {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(120% 80% at 50% 0%, rgba(250,247,244,0) 0%, rgba(250,247,244,0.35) 70%, rgba(250,247,244,0.7) 100%);
+  }
+
+  .wrap { max-width: var(--measure); margin-inline: auto; padding-inline: var(--space-4); }
+
+  /* hero */
+  header.hero {
+    min-height: 76vh;
+    display: flex; flex-direction: column; justify-content: center;
+    text-align: center; padding: var(--space-8) var(--space-4);
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.28em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: var(--space-5);
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(2.6rem, 1.8rem + 4vw, 4.6rem); line-height: 1.08; letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-weight: 300; font-size: clamp(1rem, 0.95rem + 0.4vw, 1.18rem);
+    color: var(--ink-soft); margin-top: var(--space-5); font-style: italic;
+  }
+  .scroll-cue {
+    margin-top: var(--space-8); font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.2em; color: var(--ink-faint); animation: float 3.2s var(--ease) infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0);opacity:.5} 50%{transform:translateY(6px);opacity:1} }
+
+  main { padding-bottom: var(--space-9); }
+
+  .block { margin-block: var(--space-9); opacity: 0; transform: translateY(28px);
+    transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
+  .block.seen { opacity: 1; transform: none; }
+
+  .b-text p {
+    font-family: var(--serif); font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
+    line-height: 1.7; color: var(--ink);
+  }
+  .b-text p:lang(th) { font-family: "Noto Serif Thai", var(--serif); line-height: 1.95; }
+
+  .b-quote { text-align: center; padding-block: var(--space-5); }
+  .b-quote .mark { font-family: var(--serif); font-size: 3rem; line-height: 0; color: var(--sage); opacity: .45; display: block; height: 1.2rem; }
+  .b-quote blockquote { font-family: var(--serif); font-style: italic; font-size: clamp(1.5rem, 1.3rem + 1vw, 2.1rem); line-height: 1.5; color: var(--ink); margin-block: var(--space-4); }
+  .b-quote cite { font-family: var(--mono); font-style: normal; font-size: 12px; letter-spacing: .12em; color: var(--ink-faint); }
+
+  /* hero lead image */
+  .hero-img { margin-top: calc(-1 * var(--space-7)); margin-bottom: var(--space-9);
+    opacity: 0; transform: translateY(24px); transition: opacity 1.3s var(--ease), transform 1.3s var(--ease); }
+  .hero-img.seen { opacity: 1; transform: none; }
+  .hero-img img { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 50px 95px -32px rgba(42,42,46,0.34); }
+  .hero-img figcaption { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-faint); text-align: center; margin-top: var(--space-3); }
+
+  .b-image figure { margin: 0; }
+  .b-image img { width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 40px 80px -30px rgba(42,42,46,0.28); }
+  .b-image figcaption { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--ink-faint); text-align: center; margin-top: var(--space-3); }
+
+  .b-music .frame { border-radius: 12px; overflow: hidden; box-shadow: 0 40px 80px -34px rgba(42,42,46,0.3); background: var(--panel); backdrop-filter: blur(8px); }
+  .b-music iframe { display: block; width: 100%; border: 0; }
+  .b-music .label { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint); text-align: center; margin-bottom: var(--space-4); }
+
+  footer { text-align: center; padding: var(--space-8) var(--space-4) var(--space-7); font-family: var(--mono); font-size: 12px; letter-spacing: .2em; color: var(--ink-faint); }
+  footer .sig { color: var(--ink-soft); }
+  footer .breathe { margin-top: var(--space-4); }
+  .divider { width: 36px; height: 1px; background: var(--hair); margin: 0 auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .block, .hero-img { opacity: 1; transform: none; transition: none; }
+    .scroll-cue { animation: none; } html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gradient"></canvas>
+<div id="veil"></div>
+
+<header class="hero">
+  <div class="eyebrow">a quiet place</div>
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+  <div class="scroll-cue">↓ scroll</div>
+</header>
+
+<figure class="hero-img wrap" id="heroFig" hidden>
+  <img id="heroImg" alt="" />
+  <figcaption id="heroCap"></figcaption>
+</figure>
+
+<main class="wrap" id="main"></main>
+
+<footer>
+  <div class="divider"></div>
+  <div class="breathe sig" id="signature"></div>
+  <div class="breathe">breathe ◦ you're okay</div>
+</footer>
+
+<script>
+(function () {
+  const data = (typeof MY_SPACE !== "undefined" && MY_SPACE)
+    ? MY_SPACE
+    : { title: "My Space", subtitle: "", blocks: [] };
+
+  const esc = s => String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  function musicEmbed(url) {
+    url = (url || "").trim();
+    let m = url.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/);
+    if (m) return `<iframe src="https://open.spotify.com/embed/${m[1]}/${m[2]}?theme=0" height="${m[1]==='track'?152:352}" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
+    m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (m) return `<iframe src="https://www.youtube.com/embed/${m[1]}?rel=0" height="315" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    return `<div style="padding:24px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--ink-faint)">paste a Spotify or YouTube link</div>`;
+  }
+
+  function renderBlock(b) {
+    switch (b.type) {
+      case "text":  return `<div class="block b-text"><p>${esc(b.body).replace(/\n/g,"<br>")}</p></div>`;
+      case "quote": return `<div class="block b-quote"><span class="mark">&ldquo;</span><blockquote>${esc(b.body)}</blockquote>${b.by?`<cite>${esc(b.by)}</cite>`:""}</div>`;
+      case "image": return `<div class="block b-image"><figure><img src="${esc(b.src)}" alt="${esc(b.caption||"")}" loading="lazy" />${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:""}</figure></div>`;
+      case "music": return `<div class="block b-music"><div class="label">now playing</div><div class="frame">${musicEmbed(b.url)}</div></div>`;
+      default:      return "";
+    }
+  }
+
+  document.getElementById("title").textContent = data.title || "My Space";
+  document.getElementById("subtitle").textContent = data.subtitle || "";
+  document.getElementById("signature").textContent = data.signature || "";
+  document.title = data.title || "My Space";
+
+  // hero image — show by default, fade in on load, hide only if it truly fails
+  const heroFig = document.getElementById("heroFig");
+  if (data.heroImage) {
+    const im = document.getElementById("heroImg");
+    const show = () => { heroFig.hidden = false; heroFig.classList.add("seen"); };
+    im.onload  = show;
+    im.onerror = () => { heroFig.hidden = true; };
+    im.alt = data.heroCaption || "";
+    im.src = data.heroImage;
+    document.getElementById("heroCap").textContent = data.heroCaption || "";
+    heroFig.hidden = false;                       // reveal the slot immediately
+    if (im.complete && im.naturalWidth > 0) show();
+    setTimeout(() => { if (im.naturalWidth > 0) show(); }, 1500); // safety net
+  } else {
+    heroFig.hidden = true;
+  }
+
+  const main = document.getElementById("main");
+  main.innerHTML = (data.blocks || []).map(renderBlock).join(`<div class="divider"></div>`);
+
+  const reveal = document.querySelectorAll(".block");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("seen"); io.unobserve(e.target); } });
+    }, { threshold: 0.18 });
+    reveal.forEach(b => io.observe(b));
+  } else {
+    reveal.forEach(b => b.classList.add("seen"));
+  }
+
+  /* ── dreamy flowing gradient (WebGL) ── */
+  const canvas = document.getElementById("gradient");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+  if (!gl) { canvas.style.background = "linear-gradient(140deg,#eee3cc 0%,#bcd0c9 45%,#9fb8b2 70%,#e7d8c2 100%)"; return; }
+
+  const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
+  const fs = `
+    precision highp float;
+    uniform vec2 u_res; uniform float u_t;
+    vec3 cA = vec3(0.937,0.902,0.823);
+    vec3 cB = vec3(0.612,0.722,0.698);
+    vec3 cC = vec3(0.486,0.612,0.596);
+    vec3 cD = vec3(0.882,0.745,0.612);
+    vec3 cE = vec3(0.694,0.776,0.768);
+    float wave(vec2 uv,float t){ return sin(uv.x*2.6+t)+sin(uv.y*2.1-t*0.8)+sin((uv.x+uv.y)*1.7+t*0.6)+sin((uv.x-uv.y)*2.3-t*0.5); }
+    void main(){
+      vec2 uv = gl_FragCoord.xy/u_res; uv.x *= u_res.x/u_res.y;
+      float t = u_t*0.18;
+      vec2 w = vec2(wave(uv,t),wave(uv+3.7,t+1.3))*0.18;
+      float f = wave(uv+w,t)/4.0; float g = wave(uv*0.7-w,t*0.8+5.0)/4.0;
+      float a = smoothstep(-1.0,1.0,f); float b = smoothstep(-1.0,1.0,g);
+      vec3 col = mix(cA,cB,a); col = mix(col,cC,b*0.7); col = mix(col,cD,a*b); col = mix(col,cE,(1.0-a)*0.4);
+      vec2 c = gl_FragCoord.xy/u_res - 0.5;
+      col = mix(col,cA,smoothstep(0.35,0.95,length(c))*0.45);
+      gl_FragColor = vec4(col,1.0);
+    }`;
+  function compile(t,s){ const sh=gl.createShader(t); gl.shaderSource(sh,s); gl.compileShader(sh); return sh; }
+  const prog = gl.createProgram();
+  gl.attachShader(prog,compile(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog,"p"); gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const uRes = gl.getUniformLocation(prog,"u_res"), uT = gl.getUniformLocation(prog,"u_t");
+  function resize(){ const dpr=Math.min(window.devicePixelRatio||1,1.6); canvas.width=Math.floor(innerWidth*dpr); canvas.height=Math.floor(innerHeight*dpr); gl.viewport(0,0,canvas.width,canvas.height); gl.uniform2f(uRes,canvas.width,canvas.height); }
+  window.addEventListener("resize",resize); resize();
+  const start = performance.now();
+  function frame(now){ gl.uniform1f(uT,(now-start)/1000); gl.drawArrays(gl.TRIANGLES,0,3); if(!reduce) requestAnimationFrame(frame); }
+  if (reduce){ gl.uniform1f(uT,8.0); gl.drawArrays(gl.TRIANGLES,0,3); } else requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
