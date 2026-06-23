@@ -127,7 +127,7 @@ const MY_SPACE = {
     text-transform: uppercase; color: var(--ink-faint); margin-bottom: var(--space-5);
   }
   h1 {
-    font-family: var(--sans); font-weight: 300;
+    font-family: var(--sans); font-weight: 400;
     font-size: clamp(2.6rem, 1.8rem + 4vw, 4.6rem); line-height: 1.08; letter-spacing: -0.01em;
   }
   .subtitle {
@@ -148,12 +148,12 @@ const MY_SPACE = {
 
   .b-text p {
     font-family: var(--sans); font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
-    line-height: 1.85; color: var(--ink); font-weight: 300;
+    line-height: 1.85; color: var(--ink); font-weight: 400;
   }
 
   .b-quote { text-align: center; padding-block: var(--space-5); }
   .b-quote .mark { font-family: var(--sans); font-size: 3rem; line-height: 0; color: var(--sage); opacity: .45; display: block; height: 1.2rem; }
-  .b-quote blockquote { font-family: var(--sans); font-weight: 300; font-style: normal; font-size: clamp(1.5rem, 1.3rem + 1vw, 2.1rem); line-height: 1.6; color: var(--ink); margin-block: var(--space-4); }
+  .b-quote blockquote { font-family: var(--sans); font-weight: 400; font-style: normal; font-size: clamp(1.5rem, 1.3rem + 1vw, 2.1rem); line-height: 1.6; color: var(--ink); margin-block: var(--space-4); }
   .b-quote cite { font-family: var(--mono); font-style: normal; font-size: 12px; letter-spacing: .12em; color: var(--ink-faint); }
 
   /* hero lead image */
@@ -161,11 +161,11 @@ const MY_SPACE = {
     opacity: 0; transform: translateY(24px); transition: opacity 1.3s var(--ease), transform 1.3s var(--ease); }
   .hero-img.seen { opacity: 1; transform: none; }
   .hero-img img { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 50px 95px -32px rgba(42,42,46,0.34); }
-  .hero-img figcaption { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-faint); text-align: center; margin-top: var(--space-3); }
+  .hero-img figcaption { font-family: var(--sans); font-size: 13px; font-weight: 300; letter-spacing: .04em; color: var(--ink-soft); text-align: center; margin-top: var(--space-3); }
 
   .b-image figure { margin: 0; }
   .b-image img { width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 40px 80px -30px rgba(42,42,46,0.28); }
-  .b-image figcaption { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--ink-faint); text-align: center; margin-top: var(--space-3); }
+  .b-image figcaption { font-family: var(--sans); font-size: 13px; font-weight: 300; letter-spacing: .04em; color: var(--ink-soft); text-align: center; margin-top: var(--space-3); }
 
   .b-music .frame { border-radius: 12px; overflow: hidden; box-shadow: 0 40px 80px -34px rgba(42,42,46,0.3); background: var(--panel); backdrop-filter: blur(8px); }
   .b-music iframe { display: block; width: 100%; border: 0; }
