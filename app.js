@@ -344,7 +344,7 @@
   const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
   if (!gl) {
-    canvas.style.background = "linear-gradient(135deg,#efe6d2 0%,#bcd0c9 40%,#6B9080 65%,#e1be9c 100%)";
+    canvas.style.background = "linear-gradient(135deg, #f7f5f0 0%, #e8ede9 40%, #dfe8e3 60%, #f2efe8 100%)";
     return;
   }
 
@@ -354,13 +354,12 @@
     uniform vec2 u_res;
     uniform float u_t;
 
-    /* richer palette — inspired by shadergradient warm-sage-cream */
-    vec3 cA = vec3(0.941, 0.906, 0.820);   /* warm cream base        */
-    vec3 cB = vec3(0.420, 0.565, 0.498);   /* sage green (richer)    */
-    vec3 cC = vec3(0.760, 0.830, 0.790);   /* light sage mist        */
-    vec3 cD = vec3(0.910, 0.835, 0.750);   /* warm sand/amber        */
-    vec3 cE = vec3(0.620, 0.750, 0.700);   /* mid sage               */
-    vec3 cF = vec3(0.850, 0.780, 0.720);   /* dusty rose hint        */
+    /* soft pastel palette — like watercolor paper */
+    vec3 c1 = vec3(0.965, 0.957, 0.940);   /* warm cream #F7F4F0      */
+    vec3 c2 = vec3(0.880, 0.915, 0.895);   /* pale sage #E1E9E4       */
+    vec3 c3 = vec3(0.910, 0.935, 0.920);   /* soft mint #E8EFE9       */
+    vec3 c4 = vec3(0.945, 0.930, 0.910);   /* warm sand #F1EDE8       */
+    vec3 c5 = vec3(0.870, 0.900, 0.880);   /* sage mist #DEE6E0       */
 
     /* simplex noise */
     vec3 mod289(vec3 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
@@ -394,42 +393,42 @@
     void main(){
       vec2 uv = gl_FragCoord.xy / u_res;
       float aspect = u_res.x / u_res.y;
-      uv.x *= aspect;
-      float t = u_t * 0.08;  /* slightly faster movement */
+      vec2 p = uv;
+      p.x *= aspect;
 
-      /* multiple noise layers at different scales and speeds */
-      float n1 = snoise(uv * 1.2 + vec2(t * 0.35, t * 0.25))      * 0.5 + 0.5;
-      float n2 = snoise(uv * 2.0 - vec2(t * 0.2, t * 0.3) + 5.0)  * 0.5 + 0.5;
-      float n3 = snoise(uv * 0.7 + vec2(t * 0.15, -t * 0.18) + 10.0) * 0.5 + 0.5;
-      float n4 = snoise(uv * 3.0 + vec2(-t * 0.1, t * 0.12) + 20.0) * 0.5 + 0.5;
+      /* very slow, gentle movement */
+      float t = u_t * 0.025;
 
-      /* diagonal flow */
-      float diag = (uv.x + uv.y) * 0.5;
+      /* large soft undulations */
+      float w1 = snoise(p * 0.6 + vec2(t * 0.18, t * 0.12))       * 0.5 + 0.5;
+      float w2 = snoise(p * 0.8 - vec2(t * 0.10, -t * 0.15) + 4.0) * 0.5 + 0.5;
+      float w3 = snoise(p * 0.4 + vec2(-t * 0.08, t * 0.10) + 8.0) * 0.5 + 0.5;
+      float w4 = snoise(p * 0.9 + vec2(t * 0.06, t * 0.14) + 12.0) * 0.5 + 0.5;
 
-      /* blend zones — stronger mixing for more visible color flow */
-      float zone1 = smoothstep(0.15, 0.65, diag + n1 * 0.45 - 0.15);
-      float zone2 = smoothstep(0.2, 0.75, n2 + diag * 0.35);
-      float zone3 = smoothstep(0.2, 0.7, n3);
-      float zone4 = smoothstep(0.3, 0.8, n4 * 0.7 + diag * 0.3);
+      /* gentle diagonal flow */
+      float diag = (p.x * 0.707 + p.y * 0.707);
 
-      /* build color — more visible tinting */
-      vec3 col = cA;
-      col = mix(col, cD, zone1 * 0.40);       /* warm sand sweep   */
-      col = mix(col, cB, zone2 * 0.30);       /* sage green blobs  */
-      col = mix(col, cC, zone3 * 0.25);       /* light sage mist   */
-      col = mix(col, cE, (1.0 - zone1) * n3 * 0.20); /* mid sage pockets */
-      col = mix(col, cF, zone4 * 0.15);       /* dusty warmth      */
+      /* very soft blend zones */
+      float f1 = smoothstep(0.2, 0.8, w1 + diag * 0.2);
+      float f2 = smoothstep(0.25, 0.75, w2 * 0.6 + w3 * 0.4);
+      float f3 = smoothstep(0.3, 0.7, w3 + (1.0 - diag) * 0.15);
+      float f4 = smoothstep(0.2, 0.8, w4 * 0.5 + w1 * 0.5);
 
-      /* subtle highlight shimmer */
-      float shimmer = snoise(uv * 4.0 + vec2(t * 0.5, t * 0.3)) * 0.5 + 0.5;
-      col += vec3(0.02) * shimmer * (1.0 - zone1);
+      /* gentle color blending — all very subtle */
+      vec3 col = c1;                              /* warm cream base     */
+      col = mix(col, c2, f1 * 0.45);              /* pale sage wash      */
+      col = mix(col, c3, f2 * 0.35);              /* soft mint hints     */
+      col = mix(col, c4, (1.0 - f1) * 0.30);      /* warm sand areas     */
+      col = mix(col, c5, f3 * f4 * 0.25);          /* sage mist pockets   */
+      col = mix(col, c1, f4 * 0.20);              /* cream highlights    */
 
-      /* soft vignette */
+      /* very soft vignette */
       vec2 vc = gl_FragCoord.xy / u_res - 0.5;
-      col = mix(col, cA, smoothstep(0.25, 1.0, length(vc)) * 0.45);
+      col = mix(col, c1, smoothstep(0.3, 1.1, length(vc)) * 0.35);
 
       gl_FragColor = vec4(col, 1.0);
     }`;
+
 
   function compile(t, s) {
     const sh = gl.createShader(t);
