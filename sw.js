@@ -1,7 +1,9 @@
-const CACHE_NAME = 'sap-cache-v1';
+const CACHE_NAME = 'sap-cache-v2';
 const ASSETS = [
   './',
   './index.html',
+  './styles.css',
+  './app.js',
   './manifest.json',
   './chapters/index.js',
   './chapters/chapter-1.js',
@@ -38,25 +40,21 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Only handle GET requests and local/same-origin assets
   if (e.request.method !== 'GET') return;
   
   const url = new URL(e.request.url);
-  
-  // Exclude external APIs or schemes like chrome-extension://
   if (!url.protocol.startsWith('http') && !url.protocol.startsWith('https')) return;
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch fresh copy in background to keep cache up to date
         fetch(e.request).then((networkResponse) => {
           if (networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(e.request, networkResponse);
             });
           }
-        }).catch(() => {/* Ignore network failures in background */});
+        }).catch(() => {});
         
         return cachedResponse;
       }
