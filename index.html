@@ -23,53 +23,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-<!-- ════════════════════════════════════════════════════════════
-     ✏️  EDIT YOUR STORY HERE  — แก้เรื่องราว / รูป / เพลง ตรงนี้ที่เดียว
-     ทุกอย่างอยู่ในไฟล์เดียวแล้ว ไม่มีไฟล์ js แยก
-     - รูปหลัก: ใส่ชื่อไฟล์รูปที่ heroImage (ต้องตรงตัวพิมพ์ใหญ่/เล็กเป๊ะ)
-     - blocks: ก๊อปบรรทัดมาวาง แล้วแก้ข้อความ คั่นด้วยคอมมา ,
-         { type:"text",  body:"..." }
-         { type:"quote", body:"...", by:"— me" }
-         { type:"image", src:"photo.png", caption:"..." }
-         { type:"music", url:"spotify หรือ youtube link" }
-     เซฟ → เปิด index.html ใหม่ (Cmd+Shift+R)
-     ════════════════════════════════════════════════════════════ -->
-<script>
-const MY_SPACE = {
-
-  title:    "Sap",
-  subtitle: "คืนที่เบาที่สุด — ฉากแรก",
-  signature: "SAP by Teera",
-
-  heroImage:   "SAP-01.png",                 // ← ชื่อไฟล์รูป (ตรงตัวพิมพ์เป๊ะ)
-  heroCaption: "ห้องเล็ก ๆ ที่หายใจได้",
-
-  blocks: [
-    { type: "text",
-      body: "คืนนี้ฟ้าข้างนอกเป็นสีคราม\nSap นั่งอยู่ริมหน้าต่าง ในห้องที่ไม่มีอะไรมาก — เตียงต่ำหนึ่งหลัง โต๊ะไม้หนึ่งตัว และแสงไฟดวงเดียวที่อุ่นพอจะเรียกว่าบ้าน" },
-
-    { type: "text",
-      body: "เขาไม่ได้หนีจากโลก เขาแค่ค้นพบว่า โลกทั้งใบใส่ลงในห้องเล็ก ๆ ได้ — ถ้าเลือกเก็บไว้เฉพาะสิ่งที่ทำให้ใจเต้นช้าลง" },
-
-    { type: "text",
-      body: "ตรงขอบหน้าต่าง มีถาดต้นอ่อนเรียงกันเป็นแถว เขียวอ่อนจนเกือบโปร่งแสง\nSap ยกบัวรดน้ำใบเล็ก เอียงมือช้า ๆ น้ำหยดลงดินทีละเม็ด เหมือนเวลายอมเดินช้าลงเพื่อเขา" },
-
-    { type: "quote",
-      body: "งานที่เรารัก ไม่เคยทำให้เราเหนื่อย เท่ากับงานที่เราต้องแกล้งรัก",
-      by: "— Sap" },
-
-    { type: "text",
-      body: "ที่นี่ การพักผ่อนกับการทำงาน ไม่ใช่คนละฝั่งของวัน\nมันคือสิ่งเดียวกัน — Sap พักไปพร้อมกับดูแลต้นกล้า และต้นกล้าก็ค่อย ๆ โตขึ้น พร้อมกับที่ใจเขาคลายลง" },
-
-    { type: "text",
-      body: "ข้างนอกหน้าต่าง ดาวค่อย ๆ ติดขึ้นทีละดวง ฟ้าเปลี่ยนจากครามเป็นม่วงจาง\nSap ไม่รีบไปไหน คืนนี้ไม่มีอะไรต้องไล่ตาม มีแค่ต้นอ่อน ลมหายใจ และฟ้าที่สวยจนไม่ต้องอธิบาย" },
-
-    { type: "text",
-      body: "ก่อนจะหลับ เขามองต้นกล้าอีกครั้ง แล้วยิ้มบาง ๆ\n“พรุ่งนี้พวกเธอจะสูงขึ้นอีกนิด”\n— และเขารู้ว่า ตัวเขาเองก็เช่นกัน" }
-  ]
-};
-</script>
-
 <style>
   /* ── EkkamaiVibe — Thai+Latin sans-serif ── */
   @font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-thin.ttf") format("truetype"); font-weight: 100; font-display: swap; }
@@ -115,6 +68,75 @@ const MY_SPACE = {
   }
 
   .wrap { max-width: var(--measure); margin-inline: auto; padding-inline: var(--space-4); }
+
+  /* ── TOC Button (subtle, top-left) ── */
+  #toc-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 100;
+    width: 40px; height: 40px; border: none; border-radius: 50%;
+    background: var(--panel); backdrop-filter: blur(12px);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 12px rgba(42,42,46,0.08);
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+    opacity: 0.6;
+  }
+  #toc-btn:hover { opacity: 1; transform: scale(1.08); }
+  #toc-btn svg { width: 18px; height: 18px; stroke: var(--ink-soft); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+  /* ── TOC Page (สารบัญ) ── */
+  #toc-page {
+    position: fixed; inset: 0; z-index: 90;
+    background: var(--paper);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-6);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.6s var(--ease);
+  }
+  #toc-page.active { opacity: 1; pointer-events: auto; }
+  .toc-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.28em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: var(--space-7);
+  }
+  .toc-list { list-style: none; width: 100%; max-width: 420px; }
+  .toc-item {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--hair);
+    cursor: pointer;
+    transition: opacity 0.3s var(--ease);
+  }
+  .toc-item:hover { opacity: 0.7; }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-num {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    color: var(--ink-faint); white-space: nowrap; min-width: 60px;
+  }
+  .toc-info { flex: 1; }
+  .toc-info-title {
+    font-family: var(--sans); font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+    font-weight: 400; color: var(--ink); line-height: 1.4;
+  }
+  .toc-info-sub {
+    font-size: 0.85rem; color: var(--ink-soft); font-weight: 300;
+    margin-top: 2px;
+  }
+  .toc-status {
+    font-family: var(--mono); font-size: 12px; color: var(--sage);
+    min-width: 20px; text-align: right;
+  }
+  .toc-close {
+    margin-top: var(--space-7);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    color: var(--ink-faint); cursor: pointer; background: none; border: none;
+    transition: color 0.3s;
+  }
+  .toc-close:hover { color: var(--ink); }
+
+  /* ── Chapter View ── */
+  #chapter-view {
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+  }
+  #chapter-view.active { opacity: 1; }
 
   /* hero */
   header.hero {
@@ -171,6 +193,23 @@ const MY_SPACE = {
   .b-music iframe { display: block; width: 100%; border: 0; }
   .b-music .label { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint); text-align: center; margin-bottom: var(--space-4); }
 
+  /* ── Chapter Navigation ── */
+  .chapter-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: var(--space-7) var(--space-4) var(--space-8);
+    max-width: var(--measure); margin-inline: auto;
+  }
+  .chapter-nav-btn {
+    font-family: var(--sans); font-size: 0.95rem; font-weight: 300;
+    color: var(--ink-soft); background: none; border: none;
+    cursor: pointer; padding: var(--space-3) 0;
+    transition: color 0.3s var(--ease), opacity 0.3s var(--ease);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chapter-nav-btn:hover { color: var(--ink); }
+  .chapter-nav-btn[disabled] { opacity: 0; pointer-events: none; }
+  .chapter-nav-btn .arrow { font-size: 1.2em; }
+
   footer { text-align: center; padding: var(--space-8) var(--space-4) var(--space-7); font-family: var(--mono); font-size: 12px; letter-spacing: .2em; color: var(--ink-faint); }
   footer .sig { color: var(--ink-soft); }
   footer .breathe { margin-top: var(--space-4); }
@@ -179,7 +218,163 @@ const MY_SPACE = {
   @media (prefers-reduced-motion: reduce) {
     .block, .hero-img { opacity: 1; transform: none; transition: none; }
     .scroll-cue { animation: none; } html { scroll-behavior: auto; }
+    #toc-page, #chapter-view, #home-page { transition: none; }
   }
+
+  /* ── Home Page (หน้าแรก) ── */
+  #home-page {
+    position: fixed; inset: 0; z-index: 80;
+    background: transparent;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: var(--space-5);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    transform: scale(0.98);
+  }
+  #home-page.active {
+    opacity: 1; pointer-events: auto;
+    transform: scale(1);
+  }
+  .home-cover {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    max-width: 440px; width: 100%;
+  }
+  .home-cover-img {
+    width: 220px; height: 350px;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 60px rgba(42, 42, 46, 0.22);
+    margin-bottom: var(--space-6);
+    transition: transform 0.6s var(--ease);
+  }
+  .home-cover-img:hover {
+    transform: scale(1.03) translateY(-4px);
+  }
+  .home-cover-img img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .home-title {
+    font-family: var(--sans); font-weight: 700;
+    font-size: clamp(2.4rem, 2rem + 2vw, 3.8rem);
+    letter-spacing: -0.02em; color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .home-subtitle {
+    font-family: var(--sans); font-weight: 300;
+    font-size: 0.95rem; color: var(--ink-soft);
+    margin-bottom: var(--space-6);
+    font-style: italic;
+  }
+  .home-actions {
+    display: flex; gap: 16px; width: 100%; justify-content: center;
+  }
+  .home-btn {
+    font-family: var(--sans); font-size: 0.95rem; font-weight: 500;
+    padding: 12px 32px; border-radius: 30px; border: none; cursor: pointer;
+    transition: all 0.3s var(--ease);
+  }
+  .home-btn.primary {
+    background: var(--sage); color: #fff;
+    box-shadow: 0 4px 15px rgba(107, 144, 128, 0.25);
+  }
+  .home-btn.primary:hover {
+    background: #5a7d6e; transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 144, 128, 0.35);
+  }
+  .home-btn.secondary {
+    background: var(--panel); color: var(--ink-soft);
+    border: 1px solid var(--hair);
+  }
+  .home-btn.secondary:hover {
+    background: var(--paper); color: var(--ink);
+    transform: translateY(-2px);
+  }
+
+  /* ── Characters Section ── */
+  .character-section {
+    margin-top: var(--space-4);
+    opacity: 0; transform: translateY(10px);
+    animation: fadeUpIn 0.8s var(--ease) forwards 0.5s;
+  }
+  @keyframes fadeUpIn { to { opacity: 1; transform: translateY(0); } }
+  
+  .character-list {
+    display: flex; justify-content: center; gap: 12px; list-style: none;
+  }
+  .character-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--panel); border: 1px solid var(--hair);
+    padding: 6px 14px; border-radius: 20px;
+    cursor: pointer; transition: all 0.3s var(--ease);
+  }
+  .character-badge:hover {
+    background: var(--paper); border-color: var(--sage); transform: translateY(-1px);
+  }
+  .character-avatar {
+    width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+  }
+  .character-name {
+    font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-soft);
+  }
+  
+  /* Modal for Character details */
+  .char-modal {
+    position: fixed; inset: 0; z-index: 110;
+    background: rgba(42, 42, 46, 0.25);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--space-4);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s var(--ease);
+  }
+  .char-modal.active {
+    opacity: 1; pointer-events: auto;
+  }
+  .char-card {
+    background: var(--paper);
+    max-width: 380px; width: 100%;
+    padding: var(--space-5);
+    border-radius: 16px;
+    box-shadow: 0 30px 70px rgba(42,42,46,0.18);
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.4s var(--ease);
+  }
+  .char-modal.active .char-card {
+    transform: translateY(0);
+  }
+  .char-card-avatar {
+    width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+    margin: 0 auto var(--space-4);
+    border: 2px solid var(--sage);
+    box-shadow: 0 8px 16px rgba(107, 144, 128, 0.15);
+  }
+  .char-card-name {
+    font-family: var(--sans); font-weight: 500; font-size: 1.25rem; color: var(--ink);
+  }
+  .char-card-role {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--sage);
+    text-transform: uppercase; margin-bottom: var(--space-4);
+  }
+  .char-card-bio {
+    font-family: var(--sans); font-size: 0.95rem; line-height: 1.6; color: var(--ink-soft);
+    margin-bottom: var(--space-5);
+  }
+  .char-card-close {
+    font-family: var(--sans); font-size: 0.9rem; font-weight: 500;
+    padding: 8px 24px; border-radius: 20px; border: none;
+    background: var(--ink); color: var(--paper); cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  .char-card-close:hover { opacity: 0.9; }
+
+  /* ── Extra TOC Navigation ── */
+  .toc-home {
+    margin-top: var(--space-5);
+    font-family: var(--sans); font-size: 13px; font-weight: 400;
+    color: var(--ink-soft); cursor: pointer; background: none; border: none;
+    transition: color 0.3s;
+  }
+  .toc-home:hover { color: var(--ink); }
 </style>
 </head>
 <body>
@@ -187,32 +382,122 @@ const MY_SPACE = {
 <canvas id="gradient"></canvas>
 <div id="veil"></div>
 
-<header class="hero">
-  <div class="eyebrow">a quiet place</div>
-  <h1 id="title"></h1>
-  <p class="subtitle" id="subtitle"></p>
-  <div class="scroll-cue">↓ scroll</div>
-</header>
+<!-- TOC Button -->
+<button id="toc-btn" aria-label="สารบัญ" title="สารบัญ">
+  <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+</button>
 
-<figure class="hero-img wrap" id="heroFig" hidden>
-  <img id="heroImg" alt="" />
-  <figcaption id="heroCap"></figcaption>
-</figure>
+<!-- TOC Page (สารบัญ) -->
+<section id="toc-page">
+  <div class="toc-title">✦ สารบัญ ✦</div>
+  <ul class="toc-list" id="toc-list"></ul>
+  <button class="toc-home" id="toc-home">← กลับหน้าแรก</button>
+  <button class="toc-close" id="toc-close">↓ กลับไปอ่านต่อ</button>
+</section>
 
-<main class="wrap" id="main"></main>
+<!-- Home Page (หน้าแรก) -->
+<section id="home-page">
+  <div class="home-cover">
+    <div class="home-cover-img">
+      <img src="SAP-01.png" alt="Sap Cover" />
+    </div>
+    <h1 class="home-title">Sap</h1>
+    <p class="home-subtitle">คืนที่เบาที่สุด — a softly told story on the web</p>
+    <div class="home-actions">
+      <button class="home-btn primary" id="home-start-btn">เริ่มอ่าน</button>
+      <button class="home-btn secondary" id="home-toc-btn">สารบัญ</button>
+    </div>
+  </div>
+</section>
 
-<footer>
-  <div class="divider"></div>
-  <div class="breathe sig" id="signature"></div>
-  <div class="breathe">breathe ◦ you're okay</div>
-</footer>
+<!-- Chapter View -->
+<div id="chapter-view">
+  <header class="hero">
+    <div class="eyebrow" id="eyebrow">a quiet place</div>
+    <h1 id="title"></h1>
+    <p class="subtitle" id="subtitle"></p>
+    
+    <!-- Character badge list -->
+    <div class="character-section" id="character-section" hidden>
+      <ul class="character-list" id="character-list"></ul>
+    </div>
+
+    <div class="scroll-cue">↓ scroll</div>
+  </header>
+
+  <figure class="hero-img wrap" id="heroFig" hidden>
+    <img id="heroImg" alt="" />
+    <figcaption id="heroCap"></figcaption>
+  </figure>
+
+  <main class="wrap" id="main"></main>
+
+  <!-- Chapter Navigation -->
+  <nav class="chapter-nav" id="chapter-nav">
+    <button class="chapter-nav-btn" id="nav-prev" disabled>
+      <span class="arrow">←</span> <span id="nav-prev-label"></span>
+    </button>
+    <button class="chapter-nav-btn" id="nav-next" disabled>
+      <span id="nav-next-label"></span> <span class="arrow">→</span>
+    </button>
+  </nav>
+
+  <footer>
+    <div class="divider"></div>
+    <div class="breathe sig" id="signature">SAP by Teera</div>
+    <div class="breathe">breathe ◦ you're okay</div>
+  </footer>
+</div>
+
+<!-- Character Detail Modal -->
+<div class="char-modal" id="char-modal" role="dialog" aria-modal="true" aria-labelledby="char-modal-name">
+  <div class="char-card">
+    <img class="char-card-avatar" id="char-card-avatar" src="" alt="" />
+    <h3 class="char-card-name" id="char-modal-name"></h3>
+    <div class="char-card-role" id="char-card-role"></div>
+    <p class="char-card-bio" id="char-card-bio"></p>
+    <button class="char-card-close" id="char-card-close">ปิด</button>
+  </div>
+</div>
 
 <script>
 (function () {
-  const data = (typeof MY_SPACE !== "undefined" && MY_SPACE)
-    ? MY_SPACE
-    : { title: "My Space", subtitle: "", blocks: [] };
+  /* ══════════════════════════════════════
+     SAP Chapter Engine
+     ══════════════════════════════════════ */
 
+  const APP = { title: "Sap", signature: "SAP by Teera" };
+
+  // ── State ──
+  let chapterList = [];        // manifest [{chapter, title, subtitle}]
+  let currentChapter = null;   // loaded chapter data
+  let currentChapterNum = 0;
+  const characterCache = {};   // cached character metadata
+
+  // ── DOM refs ──
+  const tocPage      = document.getElementById("toc-page");
+  const tocListEl    = document.getElementById("toc-list");
+  const tocBtn       = document.getElementById("toc-btn");
+  const tocClose     = document.getElementById("toc-close");
+  const tocHome      = document.getElementById("toc-home");
+  const homePage     = document.getElementById("home-page");
+  const chapterView  = document.getElementById("chapter-view");
+  const titleEl      = document.getElementById("title");
+  const subtitleEl   = document.getElementById("subtitle");
+  const eyebrowEl    = document.getElementById("eyebrow");
+  const heroFig      = document.getElementById("heroFig");
+  const heroImg      = document.getElementById("heroImg");
+  const heroCap      = document.getElementById("heroCap");
+  const mainEl       = document.getElementById("main");
+  const navPrev      = document.getElementById("nav-prev");
+  const navNext      = document.getElementById("nav-next");
+  const navPrevLabel = document.getElementById("nav-prev-label");
+  const navNextLabel = document.getElementById("nav-next-label");
+
+  const charSection  = document.getElementById("character-section");
+  const charListEl   = document.getElementById("character-list");
+
+  // ── Helpers ──
   const esc = s => String(s == null ? "" : s)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
@@ -235,39 +520,328 @@ const MY_SPACE = {
     }
   }
 
-  document.getElementById("title").textContent = data.title || "My Space";
-  document.getElementById("subtitle").textContent = data.subtitle || "";
-  document.getElementById("signature").textContent = data.signature || "";
-  document.title = data.title || "My Space";
-
-  // hero image — show by default, fade in on load, hide only if it truly fails
-  const heroFig = document.getElementById("heroFig");
-  if (data.heroImage) {
-    const im = document.getElementById("heroImg");
-    const show = () => { heroFig.hidden = false; heroFig.classList.add("seen"); };
-    im.onload  = show;
-    im.onerror = () => { heroFig.hidden = true; };
-    im.alt = data.heroCaption || "";
-    im.src = data.heroImage;
-    document.getElementById("heroCap").textContent = data.heroCaption || "";
-    heroFig.hidden = false;                       // reveal the slot immediately
-    if (im.complete && im.naturalWidth > 0) show();
-    setTimeout(() => { if (im.naturalWidth > 0) show(); }, 1500); // safety net
-  } else {
-    heroFig.hidden = true;
+  function observeBlocks() {
+    const blocks = document.querySelectorAll(".block");
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("seen"); io.unobserve(e.target); } });
+      }, { threshold: 0.18 });
+      blocks.forEach(b => io.observe(b));
+    } else {
+      blocks.forEach(b => b.classList.add("seen"));
+    }
   }
 
-  const main = document.getElementById("main");
-  main.innerHTML = (data.blocks || []).map(renderBlock).join(`<div class="divider"></div>`);
+  // ── Page Routing State ──
+  function showPage(pageId) {
+    homePage.classList.remove("active");
+    chapterView.classList.remove("active");
+    tocPage.classList.remove("active");
+    
+    if (pageId === "home") {
+      homePage.classList.add("active");
+      document.body.style.overflow = "hidden";
+      tocBtn.classList.remove("visible");
+      window.scrollTo(0, 0);
+    } else if (pageId === "chapter") {
+      chapterView.classList.add("active");
+      document.body.style.overflow = "";
+      tocBtn.classList.add("visible");
+    } else if (pageId === "toc") {
+      tocPage.classList.add("active");
+      document.body.style.overflow = "hidden";
+      tocBtn.classList.remove("visible");
+    }
+  }
 
-  const reveal = document.querySelectorAll(".block");
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("seen"); io.unobserve(e.target); } });
-    }, { threshold: 0.18 });
-    reveal.forEach(b => io.observe(b));
-  } else {
-    reveal.forEach(b => b.classList.add("seen"));
+  // ── Characters Loader & Details ──
+  const charModal = document.getElementById("char-modal");
+  const charModalAvatar = document.getElementById("char-card-avatar");
+  const charModalName = document.getElementById("char-modal-name");
+  const charModalRole = document.getElementById("char-card-role");
+  const charModalBio = document.getElementById("char-card-bio");
+  const charModalClose = document.getElementById("char-card-close");
+
+  function loadCharacterData(id) {
+    if (characterCache[id]) return Promise.resolve(characterCache[id]);
+    return new Promise((resolve) => {
+      window.__SAP_CHARACTER__ = (charData) => {
+        characterCache[id] = charData;
+        resolve(charData);
+      };
+      loadScript(`characters/${id}.js`).catch(() => {
+        resolve(null);
+      });
+    });
+  }
+
+  function showCharacterModal(c) {
+    charModalAvatar.src = c.avatar || "icons/apple-touch-icon.png";
+    charModalName.textContent = c.name;
+    charModalRole.textContent = c.role || "ตัวละคร";
+    charModalBio.textContent = c.description || "";
+    charModal.classList.add("active");
+  }
+
+  function hideCharacterModal() {
+    charModal.classList.remove("active");
+  }
+
+  charModalClose.addEventListener("click", hideCharacterModal);
+  charModal.addEventListener("click", (e) => {
+    if (e.target === charModal) hideCharacterModal();
+  });
+
+  // ── localStorage Progress ──
+  const STORAGE_KEY = "sap_reading_progress";
+
+  function saveProgress() {
+    const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+    const chaptersRead = getProgress().chaptersRead || [];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currentChapter: currentChapterNum,
+      currentScrollPosition: Math.min(1, Math.max(0, scrollPct)),
+      chaptersRead,
+      lastReadAt: new Date().toISOString()
+    }));
+  }
+
+  function markChapterRead(n) {
+    const p = getProgress();
+    if (!p.chaptersRead.includes(n)) {
+      p.chaptersRead.push(n);
+      p.chaptersRead.sort((a, b) => a - b);
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+
+  function getProgress() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { currentChapter: 0, currentScrollPosition: 0, chaptersRead: [] };
+    } catch { return { currentChapter: 0, currentScrollPosition: 0, chaptersRead: [] }; }
+  }
+
+  // Save progress on scroll (debounced)
+  let scrollTimer;
+  window.addEventListener("scroll", () => {
+    if (currentChapterNum > 0) {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(saveProgress, 400);
+    }
+    // Mark chapter read if user scrolled near bottom
+    if (currentChapterNum > 0) {
+      const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+      if (scrollPct > 0.9) markChapterRead(currentChapterNum);
+    }
+  });
+
+  // ── Script Loader (JSONP-style) ──
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error("Failed to load " + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  // ── TOC ──
+  function buildTOC() {
+    const progress = getProgress();
+    tocListEl.innerHTML = chapterList.map(ch => {
+      const isRead = progress.chaptersRead.includes(ch.chapter);
+      const isCurrent = ch.chapter === currentChapterNum;
+      const status = isRead ? "✓" : isCurrent ? "→" : "";
+      return `<li class="toc-item" data-chapter="${ch.chapter}">
+        <span class="toc-num">บทที่ ${ch.chapter}</span>
+        <span class="toc-info">
+          <div class="toc-info-title">${esc(ch.title)}</div>
+          <div class="toc-info-sub">${esc(ch.subtitle)}</div>
+        </span>
+        <span class="toc-status">${status}</span>
+      </li>`;
+    }).join("");
+
+    tocListEl.querySelectorAll(".toc-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const n = parseInt(item.dataset.chapter);
+        loadChapter(n).then(() => {
+          showPage("chapter");
+          window.scrollTo(0, 0);
+        });
+      });
+    });
+  }
+
+  tocBtn.addEventListener("click", () => {
+    buildTOC();
+    showPage("toc");
+  });
+  tocClose.addEventListener("click", () => {
+    if (currentChapterNum > 0) {
+      showPage("chapter");
+    } else {
+      showPage("home");
+    }
+  });
+  tocHome.addEventListener("click", () => {
+    showPage("home");
+  });
+
+  // ── Home Page Actions ──
+  document.getElementById("home-start-btn").addEventListener("click", () => {
+    loadChapter(1).then(() => {
+      showPage("chapter");
+      window.scrollTo(0, 0);
+    });
+  });
+  document.getElementById("home-toc-btn").addEventListener("click", () => {
+    buildTOC();
+    showPage("toc");
+  });
+
+  // ── Chapter Rendering ──
+  function renderChapter(data) {
+    currentChapter = data;
+    currentChapterNum = data.chapter;
+
+    // Update header
+    eyebrowEl.textContent = `บทที่ ${data.chapter}`;
+    titleEl.textContent = data.title || APP.title;
+    subtitleEl.textContent = data.subtitle || "";
+    document.title = `${data.title} — ${APP.title}`;
+
+    // Hero image
+    if (data.heroImage) {
+      const show = () => { heroFig.hidden = false; heroFig.classList.add("seen"); };
+      heroImg.onload = show;
+      heroImg.onerror = () => { heroFig.hidden = true; };
+      heroImg.alt = data.heroCaption || "";
+      heroImg.src = data.heroImage;
+      heroCap.textContent = data.heroCaption || "";
+      heroFig.hidden = false;
+      heroFig.classList.remove("seen");
+      if (heroImg.complete && heroImg.naturalWidth > 0) show();
+      setTimeout(() => { if (heroImg.naturalWidth > 0) show(); }, 1500);
+    } else {
+      heroFig.hidden = true;
+    }
+
+    // Blocks
+    mainEl.innerHTML = (data.blocks || []).map(renderBlock).join(`<div class="divider"></div>`);
+    observeBlocks();
+
+    // Characters
+    charListEl.innerHTML = "";
+    if (data.characters && data.characters.length > 0) {
+      Promise.all(data.characters.map(loadCharacterData)).then((chars) => {
+        const validChars = chars.filter(c => c !== null);
+        if (validChars.length > 0) {
+          charListEl.innerHTML = validChars.map(c => `
+            <li class="character-badge" data-id="${c.id}">
+              <img class="character-avatar" src="${esc(c.avatar)}" alt="${esc(c.name)}" />
+              <span class="character-name">${esc(c.name)}</span>
+            </li>
+          `).join("");
+          
+          charListEl.querySelectorAll(".character-badge").forEach(badge => {
+            badge.addEventListener("click", () => {
+              const c = characterCache[badge.dataset.id];
+              if (c) showCharacterModal(c);
+            });
+          });
+          charSection.hidden = false;
+        } else {
+          charSection.hidden = true;
+        }
+      });
+    } else {
+      charSection.hidden = true;
+    }
+
+    // Navigation
+    updateNav();
+
+    // Save progress
+    saveProgress();
+  }
+
+  function updateNav() {
+    const idx = chapterList.findIndex(c => c.chapter === currentChapterNum);
+    const prev = idx > 0 ? chapterList[idx - 1] : null;
+    const next = idx < chapterList.length - 1 ? chapterList[idx + 1] : null;
+
+    if (prev) {
+      navPrev.disabled = false;
+      navPrevLabel.textContent = `บทที่ ${prev.chapter}`;
+      navPrev.onclick = () => { loadChapter(prev.chapter); window.scrollTo(0, 0); };
+    } else {
+      navPrev.disabled = true;
+    }
+
+    if (next) {
+      navNext.disabled = false;
+      navNextLabel.textContent = `บทที่ ${next.chapter}`;
+      navNext.onclick = () => { loadChapter(next.chapter); window.scrollTo(0, 0); };
+    } else {
+      navNext.disabled = true;
+    }
+  }
+
+  // ── Lazy Chapter Loading ──
+  function loadChapter(n) {
+    return new Promise((resolve) => {
+      window.__SAP_CHAPTER__ = (data) => {
+        renderChapter(data);
+        resolve(data);
+      };
+      loadScript(`chapters/chapter-${n}.js`).catch(() => {
+        mainEl.innerHTML = `<div class="block b-text seen"><p>ไม่พบบทที่ ${n}</p></div>`;
+        resolve(null);
+      });
+    });
+  }
+
+  // ── Init ──
+  window.__SAP_CHAPTERS__ = (list) => {
+    chapterList = list;
+    buildTOC();
+
+    const progress = getProgress();
+
+    if (progress.currentChapter > 0) {
+      // Returning reader — resume last chapter
+      loadChapter(progress.currentChapter).then(() => {
+        showPage("chapter");
+        // Restore scroll position after a brief delay for rendering
+        if (progress.currentScrollPosition > 0) {
+          setTimeout(() => {
+            const target = progress.currentScrollPosition * (document.body.scrollHeight - window.innerHeight);
+            window.scrollTo(0, target);
+          }, 300);
+        }
+      });
+    } else {
+      // First visit — show the Home page cover!
+      showPage("home");
+    }
+  };
+
+  // Load the chapter manifest
+  loadScript("chapters/index.js").catch(() => {
+    // Fallback: if manifest fails, try to load chapter 1 directly
+    chapterList = [{ chapter: 1, title: "คืนที่เบาที่สุด", subtitle: "ฉากแรก" }];
+    loadChapter(1).then(() => showPage("chapter"));
+  });
+
+  // ── Register Service Worker ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker registered', reg))
+        .catch(err => console.log('Service Worker registration failed', err));
+    });
   }
 
   /* ── dreamy flowing gradient (WebGL) ── */
