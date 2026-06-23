@@ -258,10 +258,9 @@ When users "Add to Home Screen" on iOS/Android, the app should show a **beautifu
 
 - **Book feel** — The reader should forget they're on a website
 - **Quiet** — No loud UI. No distracting navigation bars
-- **Typography first** — Three font layers:
-  - **EkkamaiVibe** (`--sans`) — Primary font for body, UI, Thai+Latin. Local `.ttf`, 5 weights (Thin→Heavy). A contemporary Thai-Latin sans-serif by Ekkamai Foundry.
-  - **Noto Serif Display / Thai** (`--serif`) — Story text, quotes. Google Fonts.
-  - **IBM Plex Mono** (`--mono`) — Labels, captions, eyebrow text. Google Fonts.
+- **Typography first** — Two font layers:
+  - **EkkamaiVibe** (`--sans`) — The unified typeface for the entire reading experience (headings, body text, quotes, and UI). Local `.ttf`, 5 weights (Thin→Heavy). A contemporary Thai-Latin sans-serif by Ekkamai Foundry.
+  - **IBM Plex Mono** (`--mono`) — Used sparingly for labels, captions, metadata, and eyebrow text. Google Fonts.
 - **Warm palette** — Paper tones, sage green, soft shadows
 - **Smooth transitions** — Fade between pages, scroll reveal for text blocks
 - **Minimal chrome** — TOC button is subtle, only appears when needed
