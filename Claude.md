@@ -23,18 +23,18 @@ The story is divided into **chapters** (บท):
 
 ```
 บทที่ 1 — คืนที่เบาที่สุด (ฉากแรก)
-บทที่ 2 — ...
-บทที่ 3 — ...
+บทที่ 2 — ข้างนอกหน้าต่าง (โลกที่มีทั้งคมและอุ่น)
 ...
 ```
 
-- Each chapter is a **separate data file** (e.g. `chapters/chapter-1.json` or a JS module)
-- Only the **current chapter** is loaded at any time → **lazy loading for speed**
+- Each chapter is a **separate JS file** (e.g. `chapters/chapter-1.js`)
+- Only the **current chapter** is loaded at any time → **lazy loading via JSONP-style callbacks**
 - The app never loads all chapters at once
+- A chapter manifest (`chapters/index.js`) lists all available chapters
 
 ### Content Blocks (per chapter)
 
-Each chapter contains an array of content blocks, same as the current `MY_SPACE.blocks`:
+Each chapter contains an array of content blocks:
 
 | Type      | Purpose                         |
 |-----------|----------------------------------|
@@ -43,82 +43,64 @@ Each chapter contains an array of content blocks, same as the current `MY_SPACE.
 | `image`   | Illustration / scene image       |
 | `music`   | Embedded Spotify / YouTube       |
 
+### Reading Experience
+
+- **Scroll-based** — Content blocks fade in as the reader scrolls (IntersectionObserver)
+- **Scroll cue** — A minimal animated line + dot (no text) hints the reader to scroll down
+- **Progress bar** — Thin sage-green line at the top fills as the reader scrolls through the chapter
+- No page-based tap navigation — scrolling is the reading mechanism
+
 ---
 
 ## 🧑‍🎨 Characters (ตัวละคร)
 
-Each chapter may feature **different characters**. Right now there is only one:
+### Naming Convention
 
-### Sap (ตัวเอก)
+- **Project/branding name**: "Sap" (English, used in titles and UI)
+- **Character name in story text**: "ซิป" (Thai pronunciation, used in all chapter body text and quote attributions)
+
+### ซิป (ตัวเอก)
 - A quiet boy who finds peace in a small room
 - Grows sprouts on his windowsill
 - Lives simply, breathes slowly
 
-**More characters will be added over time.** The structure must support this:
-
-```js
-// Example: chapter data with character info
-{
-  chapter: 1,
-  title: "คืนที่เบาที่สุด",
-  subtitle: "ฉากแรก",
-  characters: ["sap"],          // which characters appear
-  heroImage: "SAP-01.png",
-  blocks: [ ... ]
-}
-```
-
-Character definitions live in a **separate file** (e.g. `characters/sap.json`):
-
-```js
-{
-  id: "sap",
-  name: "Sap",
-  description: "เด็กหนุ่มเงียบ ๆ ที่ค้นพบความสงบในห้องเล็ก ๆ",
-  avatar: "characters/sap-avatar.png"    // optional
-}
-```
+> **Note**: The character section (badges, modal popups) has been **removed** from the UI.
+> Character data files still exist in `characters/` for future use, but they are not loaded or displayed.
+> The design philosophy is: let the reader meet characters through the story, not through UI elements.
 
 ---
 
-## 📑 Table of Contents — สารบัญ (Full Page, Not Navbar)
+## 📑 Table of Contents — สารบัญ
 
-> **สารบัญต้องเป็นหน้าเต็ม** — ไม่ใช่ navbar หรือ sidebar
+> **สารบัญ is a full-screen overlay** — not a navbar or sidebar
 
-The Table of Contents (TOC) is a **dedicated full page/screen**, designed like a real book's TOC:
+The Table of Contents opens as a blurred overlay:
 
-- Shows all chapters with their titles
-- Shows which chapters have been **read** ✓
-- Shows which chapter the reader is **currently on** →
+- Shows all chapters with titles and subtitles
+- Shows reading status:
+  - `✓` = read (sage green)
+  - `→` = currently reading
+  - Green dot (•) marker on the left of the current chapter
+  - Blank = unread
 - Tap/click a chapter → navigate to it (lazy loads that chapter)
-- Beautiful, book-like design — not a simple list
+- **Close**: × button (top-right) or click outside the list or press Escape
 
-```
-┌─────────────────────────────────────────┐
-│              ✦  สารบัญ  ✦              │
-│                                         │
-│   บทที่ 1 ─── คืนที่เบาที่สุด    ✓    │
-│   บทที่ 2 ─── ...               →    │
-│   บทที่ 3 ─── ...                     │
-│   บทที่ 4 ─── ...                     │
-│                                         │
-└─────────────────────────────────────────┘
+### How to access:
+- Subtle **hamburger button** (☰) fixed top-left, only visible during reading
+- Keyboard: **Escape** key toggles TOC
+- **No "กลับหน้าแรก" or "กลับไปอ่านต่อ" buttons** — removed for cleanliness
 
-✓ = read    → = currently reading    (blank) = unread
-```
-
-How to access the TOC:
-- A subtle **button or icon** on screen (e.g. ☰ or a book icon)
-- **NOT a permanent navbar** — keep the reading experience clean
-- Feels like flipping to the front of the book
+### Font
+- สารบัญ title and บทที่ labels use **EkkamaiVibe** (Thai sans-serif), NOT monospace
+- This ensures Thai text renders beautifully
 
 ---
 
-## 🔖 Reading Progress — จำหน้าที่อ่าน
+## 🔖 Reading Progress — อ่านค้างไว้
 
 The app **remembers the reader's progress** using `localStorage`:
 
-### What to save:
+### What is saved:
 ```js
 {
   currentChapter: 2,            // which chapter they're on
@@ -130,58 +112,43 @@ The app **remembers the reader's progress** using `localStorage`:
 
 ### Behavior:
 - **On open**: Resume exactly where the reader left off (chapter + scroll position)
-- **On chapter complete**: Mark as read, auto-advance or show "next chapter" prompt
+- **On chapter complete** (scroll > 90%): Mark as read automatically
 - **On TOC**: Show read/unread/current status for each chapter
-- Use `localStorage` (no server needed) — works offline too
+- **Home page**: Shows **"อ่านค้างไว้ — [chapter title]"** button for returning readers
+- Uses `localStorage` — works offline too
 
 ---
 
 ## 🖼️ Images — รูปภาพ
 
 ### Current images
-Images are stored in the **same folder** as `index.html`:
-- `SAP-01.png` — hero image (Sap sitting by window with sprouts under starry sky)
+Images are stored in the **project root folder**:
+- `SAP-01.png` — Chapter 1 hero image (Sap sitting by window with sprouts under starry sky)
+- `SAP-02.png` — Chapter 2 hero image
 
 ### Image management
-- All story images live in the **project folder** (or a subfolder like `images/`)
+- All story images live in the **project folder**
 - Images can be used in:
   - **Chapter hero images** — the main illustration per chapter
   - **Inline images** — within story blocks (`type: "image"`)
   - **Home screen** — featured on the landing/home page
 - File names must be **exact** (case-sensitive for Vercel deployment)
-- Images use `loading="lazy"` for performance
-
-### Home Screen
-The **home/landing screen** should showcase:
-- App title "Sap"
-- A featured image (currently `SAP-01.png`)
-- Entry point to start reading or open TOC (สารบัญ)
-- Beautiful, immersive — like a book cover
+- Images use `loading="lazy"` for performance (except hero which is `eager`)
 
 ---
 
-## 📱 Add to Home Screen — PWA Icon (ไอคอนหน้าจอ)
+## 📱 Add to Home Screen — PWA Icon
 
-When users "Add to Home Screen" on iOS/Android, the app should show a **beautiful icon** — not a generic browser screenshot.
+When users "Add to Home Screen" on iOS/Android, the app shows a **beautiful icon**.
 
 ### What's set up:
 - **`manifest.json`** — PWA manifest with app name, icons, theme color, standalone display
-- **`icons/`** folder — All icon sizes generated from `SAP-01.png` (cropped to Sap by the window)
+- **`icons/`** folder — All icon sizes generated from `SAP-01.png`
   - `apple-touch-icon.png` (180×180) — iOS home screen
   - `icon-192.png` (192×192) — Android / Chrome
   - `icon-512.png` (512×512) — Splash screen / high-res
   - `favicon.ico`, `favicon-16.png`, `favicon-32.png` — Browser tabs
-- **Meta tags in `index.html`**:
-  - `<link rel="apple-touch-icon">` — iOS icon
-  - `<link rel="manifest">` — Android PWA
-  - `<meta name="apple-mobile-web-app-capable">` — Standalone on iOS
-  - `<meta name="apple-mobile-web-app-status-bar-style">` — Status bar style
-  - `<meta name="theme-color">` — Status bar color (sage green `#6B9080`)
-
-### Behavior:
-- **iOS**: "Add to Home Screen" → Shows Sap icon with title "Sap", opens in standalone mode (no Safari chrome)
-- **Android**: "Add to Home Screen" → Shows Sap icon, app name, opens like a native app
-- **Browser tab**: Shows favicon in the tab
+- **`sw.js`** — Service worker for offline caching (stale-while-revalidate strategy)
 
 ### To update the icon:
 1. Replace `SAP-01.png` with a new hero image
@@ -200,57 +167,53 @@ When users "Add to Home Screen" on iOS/Android, the app should show a **beautifu
 
 ---
 
-## 🏗️ Architecture — How It Should Work
-
-### File Structure (Target)
+## 🏗️ Architecture — File Structure
 
 ```
 /
-├── index.html                    # Main app shell (SPA)
-├── Claude.md                     # This file — project vision
-├── HOW-TO-START.md               # Setup guide
+├── index.html              # Clean HTML shell (~80 lines)
+├── styles.css              # All CSS — design system, layout, components
+├── app.js                  # All JS — reading engine, navigation, WebGL gradient
+├── sw.js                   # Service worker (cache v2)
+├── manifest.json           # PWA manifest
 │
-├── chapters/                     # Chapter data (lazy loaded)
-│   ├── chapter-1.js (or .json)
-│   ├── chapter-2.js
-│   └── ...
+├── Claude.md               # This file — project vision & architecture
+├── HOW-TO-START.md          # Setup guide
 │
-├── characters/                   # Character definitions
-│   ├── sap.json
-│   └── ...
+├── chapters/               # Chapter data (lazy loaded via JSONP)
+│   ├── index.js            # Chapter manifest — lists all chapters
+│   ├── chapter-1.js        # บทที่ 1 — คืนที่เบาที่สุด
+│   └── chapter-2.js        # บทที่ 2 — ข้างนอกหน้าต่าง
 │
-├── images/                       # All story images
-│   ├── SAP-01.png
-│   └── ...
+├── characters/             # Character definitions (not currently loaded in UI)
+│   ├── index.js
+│   └── sap.js
 │
+├── EkkamaiVibe/            # Custom Thai+Latin font (5 weights)
+│   ├── EkkamaiVibe-thin.ttf
+│   ├── EkkamaiVibe-light.ttf
+│   ├── EkkamaiVibe-Regular.ttf
+│   ├── EkkamaiVibe-Bold.ttf
+│   └── EkkamaiVibe-Heavy.ttf
+│
+├── icons/                  # PWA & favicon icons
+│
+├── SAP-01.png              # Hero image — chapter 1
+├── SAP-02.png              # Hero image — chapter 2
 └── .gitignore
 ```
 
-### App Flow
+### Key Design Decisions
 
-```
-┌──────────┐     ┌──────────┐     ┌──────────────────┐
-│  Home /  │────▶│ สารบัญ   │────▶│ บทที่ N          │
-│  Cover   │     │ (TOC)    │     │ (lazy loaded)    │
-│          │     │          │◀────│                  │
-└──────────┘     └──────────┘     └──────────────────┘
-      │                                    │
-      │         ┌──────────────┐           │
-      └────────▶│ Resume where │◀──────────┘
-                │ reader left  │  (auto-save to
-                │ off          │   localStorage)
-                └──────────────┘
-```
-
-### Key Technical Decisions
-
-1. **Single Page App** — No page reloads. Transitions between TOC/chapters are in-app
-2. **Lazy Loading** — `fetch()` or dynamic `import()` to load only the active chapter
-3. **localStorage** — Save reading progress (chapter, scroll %, read history)
-4. **No framework** — Keep it as pure HTML/CSS/JS (static, deployable to Vercel as-is)
-5. **WebGL gradient** — Keep the living background gradient (current implementation)
-6. **Scroll-based reveal** — Keep IntersectionObserver animations for content blocks
-7. **Responsive** — Works beautifully on phone, tablet, and desktop
+1. **No framework** — Pure HTML/CSS/JS, static, deployable to Vercel as-is
+2. **Separated files** — HTML is shell only; CSS and JS are external files for production cleanliness
+3. **Lazy loading** — JSONP-style `loadScript()` to load chapters on demand
+4. **localStorage** — Reading progress persistence (chapter, scroll %, read history)
+5. **WebGL gradient** — Living animated background (simplex noise, 6-color palette)
+6. **Grain texture** — SVG-based noise overlay for premium shadergradient.co-style texture
+7. **Scroll-based reveal** — IntersectionObserver animations for content blocks
+8. **Responsive** — Works on phone, tablet, and desktop
+9. **No scroll text** — Scroll indicator is a minimal animated line + dot (no "↓ scroll" word)
 
 ---
 
@@ -258,44 +221,99 @@ When users "Add to Home Screen" on iOS/Android, the app should show a **beautifu
 
 - **Book feel** — The reader should forget they're on a website
 - **Quiet** — No loud UI. No distracting navigation bars
+- **Minimal** — Every element earns its place. If it doesn't serve the reading experience, remove it
 - **Typography first** — Two font layers:
-  - **EkkamaiVibe** (`--sans`) — The unified typeface for the entire reading experience (headings, body text, quotes, and UI). Local `.ttf`, 5 weights (Thin→Heavy). A contemporary Thai-Latin sans-serif by Ekkamai Foundry.
-  - **IBM Plex Mono** (`--mono`) — Used sparingly for labels, captions, metadata, and eyebrow text. Google Fonts.
-- **Warm palette** — Paper tones, sage green, soft shadows
+  - **EkkamaiVibe** (`--sans`) — The unified typeface for the entire reading experience (headings, body text, quotes, labels, Thai UI text). Local `.ttf`, 5 weights (Thin→Heavy). A contemporary Thai-Latin sans-serif.
+  - **IBM Plex Mono** (`--mono`) — Used sparingly for English-only labels and metadata. Google Fonts.
+- **Warm palette** — Paper tones, sage green (#6B9080), soft shadows
+- **Living background** — WebGL gradient with grain texture (inspired by shadergradient.co)
 - **Smooth transitions** — Fade between pages, scroll reveal for text blocks
-- **Minimal chrome** — TOC button is subtle, only appears when needed
+- **Minimal chrome** — TOC button is subtle, only appears when reading
+
+### What NOT to add:
+- ❌ Character badges or character modal popups
+- ❌ "กลับหน้าแรก" or "กลับไปอ่านต่อ" buttons
+- ❌ Text-based scroll cues (like "↓ scroll")
+- ❌ Permanent navbars or sidebars
+- ❌ Page-based tap/swipe navigation (keep scroll)
 
 ---
 
-## 📋 Implementation Priority
+## 🎨 Background — WebGL Gradient
 
-### Phase 1 — Chapter System & TOC
-- [ ] Restructure data into separate chapter files
-- [ ] Build chapter lazy loader
-- [ ] Create full-page Table of Contents (สารบัญ)
-- [ ] Add chapter navigation (prev/next)
+The living gradient background is a key part of the visual identity:
 
-### Phase 2 — Reading Progress
-- [ ] Save current chapter + scroll position to localStorage
-- [ ] Resume reading on app open
-- [ ] Show read/unread status on TOC
+### Palette (6 colors):
+```
+cA: warm cream base       — rgb(240, 231, 209)
+cB: sage green (rich)     — rgb(107, 144, 127)
+cC: light sage mist       — rgb(194, 212, 201)
+cD: warm sand/amber       — rgb(232, 213, 191)
+cE: mid sage              — rgb(158, 191, 179)
+cF: dusty rose hint       — rgb(217, 199, 184)
+```
 
-### Phase 3 — Characters
-- [ ] Create character data structure
-- [ ] Display character info per chapter (subtle, not intrusive)
-- [ ] Support multiple characters per chapter
+### Technique:
+- 2D simplex noise at 4 different scales/speeds
+- Diagonal flow direction
+- Smooth zone blending
+- Subtle shimmer highlight
+- Soft vignette toward edges
+- **Grain texture overlay** (SVG fractalNoise, mix-blend-mode: overlay)
+- Reduced veil opacity so gradient shines through
 
-### Phase 4 — Images & Home Screen
-- [ ] Organize images into `images/` folder
-- [ ] Design home/cover screen with featured image
-- [ ] Support chapter-specific hero images
-- [ ] Image gallery or showcase on home screen
+### Performance:
+- Canvas renders at max 1.6x device pixel ratio
+- `prefers-reduced-motion` → single static frame, no animation
+- Runs at 60fps on modern devices
 
-### Phase 5 — Polish
-- [ ] Page turn animations / transitions between chapters
-- [ ] Reading time estimate per chapter
-- [ ] Smooth scroll-to-resume on app open
-- [ ] Offline support (service worker)
+---
+
+## 📋 Adding a New Chapter
+
+### 1. Create the chapter file
+
+Create `chapters/chapter-N.js`:
+
+```js
+// ── บทที่ N — [Title] ──
+
+window.__SAP_CHAPTER__({
+  chapter: N,
+  title: "[Title]",
+  subtitle: "[Subtitle]",
+  heroImage: "IMAGE-FILE.png",      // optional
+  heroCaption: "[Caption]",          // optional
+
+  blocks: [
+    { type: "text", body: "First paragraph...\nSecond line..." },
+    { type: "quote", body: "A meaningful quote", by: "— ซิป" },
+    { type: "image", src: "image-file.png", caption: "Description" },
+    { type: "music", url: "https://open.spotify.com/track/..." }
+  ]
+});
+```
+
+### 2. Update the manifest
+
+Add entry to `chapters/index.js`:
+
+```js
+window.__SAP_CHAPTERS__([
+  { chapter: 1, title: "คืนที่เบาที่สุด", subtitle: "ฉากแรก" },
+  { chapter: 2, title: "ข้างนอกหน้าต่าง", subtitle: "โลกที่มีทั้งคมและอุ่น" },
+  { chapter: N, title: "[New Title]", subtitle: "[Subtitle]" }  // ← add here
+]);
+```
+
+### 3. Update service worker cache
+
+Add the new chapter file to `sw.js` ASSETS array and bump `CACHE_NAME` version.
+
+### 4. Important reminders
+- Use **"ซิป"** (not "Sap") for the character name in story text
+- Use **"Sap"** only for branding/title
+- Keep quote attributions as `"— ซิป"`
 
 ---
 

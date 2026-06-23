@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
    SAP — app.js
-   Page-based reading engine
+   Scroll-based reading engine
    ═══════════════════════════════════════════ */
 
 (function () {
@@ -12,8 +12,6 @@
   let chapterList = [];
   let currentChapter = null;
   let currentChapterNum = 0;
-  let pages = [];          // array of page DOM nodes
-  let currentPageIdx = 0;  // which page is showing
 
   /* ── DOM ── */
   const tocPage      = document.getElementById("toc-page");
@@ -22,12 +20,19 @@
   const tocClose     = document.getElementById("toc-close");
   const homePage     = document.getElementById("home-page");
   const chapterView  = document.getElementById("chapter-view");
-  const stage        = document.getElementById("stage");
+  const titleEl      = document.getElementById("title");
+  const subtitleEl   = document.getElementById("subtitle");
+  const eyebrowEl    = document.getElementById("eyebrow");
+  const heroFig      = document.getElementById("heroFig");
+  const heroImg      = document.getElementById("heroImg");
+  const heroCap      = document.getElementById("heroCap");
+  const mainEl       = document.getElementById("main");
+  const navPrev      = document.getElementById("nav-prev");
+  const navNext      = document.getElementById("nav-next");
+  const navPrevLabel = document.getElementById("nav-prev-label");
+  const navNextLabel = document.getElementById("nav-next-label");
   const progressBar  = document.getElementById("progress-bar");
-  const pageCounter  = document.getElementById("page-counter");
   const homeResume   = document.getElementById("home-resume");
-  const tapPrev      = document.getElementById("tap-prev");
-  const tapNext      = document.getElementById("tap-next");
 
   /* ── Helpers ── */
   const esc = s => String(s == null ? "" : s)
@@ -40,6 +45,34 @@
     m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     if (m) return `<iframe src="https://www.youtube.com/embed/${m[1]}?rel=0" height="315" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     return `<div style="padding:24px;text-align:center;font-size:13px;color:var(--ink-faint)">paste a Spotify or YouTube link</div>`;
+  }
+
+  function renderBlock(b) {
+    switch (b.type) {
+      case "text":  return `<div class="block b-text"><p>${esc(b.body).replace(/\n/g,"<br>")}</p></div>`;
+      case "quote": return `<div class="block b-quote"><span class="mark">&ldquo;</span><blockquote>${esc(b.body)}</blockquote>${b.by?`<cite>${esc(b.by)}</cite>`:""}</div>`;
+      case "image": return `<div class="block b-image"><figure><img src="${esc(b.src)}" alt="${esc(b.caption||"")}" loading="lazy" />${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:""}</figure></div>`;
+      case "music": return `<div class="block b-music"><div class="label">now playing</div><div class="frame">${musicEmbed(b.url)}</div></div>`;
+      default:      return "";
+    }
+  }
+
+  /* ── Scroll Reveal (IntersectionObserver) ── */
+  function observeBlocks() {
+    const blocks = document.querySelectorAll(".block");
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add("seen");
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.18 });
+      blocks.forEach(b => io.observe(b));
+    } else {
+      blocks.forEach(b => b.classList.add("seen"));
+    }
   }
 
   /* ── Script Loader (JSONP-style) ── */
@@ -60,11 +93,11 @@
   const STORAGE_KEY = "sap_reading_progress";
 
   function saveProgress() {
+    const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
     const chaptersRead = getProgress().chaptersRead || [];
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       currentChapter: currentChapterNum,
-      currentPage: currentPageIdx,
-      totalPages: pages.length,
+      currentScrollPosition: Math.min(1, Math.max(0, scrollPct)),
       chaptersRead,
       lastReadAt: new Date().toISOString()
     }));
@@ -81,9 +114,26 @@
 
   function getProgress() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { currentChapter: 0, currentPage: 0, chaptersRead: [] };
-    } catch { return { currentChapter: 0, currentPage: 0, chaptersRead: [] }; }
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { currentChapter: 0, currentScrollPosition: 0, chaptersRead: [] };
+    } catch { return { currentChapter: 0, currentScrollPosition: 0, chaptersRead: [] }; }
   }
+
+  /* ── Scroll listener: save progress + progress bar + mark read ── */
+  let scrollTimer;
+  window.addEventListener("scroll", () => {
+    if (currentChapterNum > 0) {
+      // Update progress bar
+      const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+      progressBar.style.width = (scrollPct * 100) + "%";
+
+      // Debounced save
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(saveProgress, 400);
+
+      // Mark chapter read near bottom
+      if (scrollPct > 0.9) markChapterRead(currentChapterNum);
+    }
+  });
 
   /* ═══════════════════════════════════════════
      PAGE ROUTING
@@ -94,19 +144,21 @@
     chapterView.classList.remove("active");
     tocPage.classList.remove("active");
     progressBar.classList.remove("visible");
-    pageCounter.classList.remove("visible");
     tocBtn.classList.remove("visible");
 
     if (pageId === "home") {
       homePage.classList.add("active");
+      document.body.style.overflow = "hidden";
       updateHomeResume();
+      window.scrollTo(0, 0);
     } else if (pageId === "chapter") {
       chapterView.classList.add("active");
+      document.body.style.overflow = "";
       progressBar.classList.add("visible");
-      pageCounter.classList.add("visible");
       tocBtn.classList.add("visible");
     } else if (pageId === "toc") {
       tocPage.classList.add("active");
+      document.body.style.overflow = "hidden";
     }
   }
 
@@ -124,256 +176,69 @@
   }
 
   /* ═══════════════════════════════════════════
-     PAGE-BASED NAVIGATION ENGINE
+     CHAPTER RENDERING
      ═══════════════════════════════════════════ */
-
-  function updateProgressUI() {
-    if (pages.length <= 1) {
-      progressBar.style.width = "100%";
-      pageCounter.textContent = "";
-      return;
-    }
-    const pct = ((currentPageIdx + 1) / pages.length) * 100;
-    progressBar.style.width = pct + "%";
-    pageCounter.textContent = `${currentPageIdx + 1} / ${pages.length}`;
-  }
-
-  function goToPage(idx, direction) {
-    if (idx < 0 || idx >= pages.length) return;
-
-    const prev = pages[currentPageIdx];
-    const next = pages[idx];
-
-    if (prev && prev !== next) {
-      prev.classList.remove("active");
-      prev.classList.add(direction === "forward" ? "exit-left" : "exit-right");
-      // Clean up exit class after transition
-      setTimeout(() => {
-        prev.classList.remove("exit-left", "exit-right");
-      }, 600);
-    }
-
-    // Prepare entry
-    next.classList.remove("exit-left", "exit-right");
-    if (direction === "forward") {
-      next.style.transform = "translateX(40px)";
-    } else {
-      next.style.transform = "translateX(-40px)";
-    }
-
-    // Force reflow
-    void next.offsetWidth;
-
-    // Animate in
-    next.style.transform = "";
-    next.classList.add("active");
-
-    currentPageIdx = idx;
-    updateProgressUI();
-    saveProgress();
-
-    // If user reached the last page, mark chapter as read
-    if (currentPageIdx === pages.length - 1) {
-      markChapterRead(currentChapterNum);
-    }
-  }
-
-  function nextPage() {
-    if (currentPageIdx < pages.length - 1) {
-      goToPage(currentPageIdx + 1, "forward");
-    }
-  }
-
-  function prevPage() {
-    if (currentPageIdx > 0) {
-      goToPage(currentPageIdx - 1, "backward");
-    }
-  }
-
-  /* ── Tap navigation ── */
-  tapNext.addEventListener("click", (e) => {
-    e.stopPropagation();
-    nextPage();
-  });
-
-  tapPrev.addEventListener("click", (e) => {
-    e.stopPropagation();
-    prevPage();
-  });
-
-  /* ── Keyboard navigation ── */
-  document.addEventListener("keydown", (e) => {
-    if (!chapterView.classList.contains("active")) return;
-    if (tocPage.classList.contains("active")) return;
-
-    if (e.key === "ArrowRight" || e.key === " ") {
-      e.preventDefault();
-      nextPage();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      prevPage();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      buildTOC();
-      showPage("toc");
-    }
-  });
-
-  /* ── Swipe navigation (touch) ── */
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let isSwiping = false;
-
-  chapterView.addEventListener("touchstart", (e) => {
-    touchStartX = e.changedTouches[0].clientX;
-    touchStartY = e.changedTouches[0].clientY;
-    isSwiping = true;
-  }, { passive: true });
-
-  chapterView.addEventListener("touchend", (e) => {
-    if (!isSwiping) return;
-    isSwiping = false;
-
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-
-    // Only count horizontal swipes (not vertical scroll attempts)
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (dx < 0) nextPage();    // swipe left → next
-      else        prevPage();    // swipe right → prev
-    }
-  }, { passive: true });
-
-  /* ═══════════════════════════════════════════
-     CHAPTER RENDERING — Build Pages
-     ═══════════════════════════════════════════ */
-
-  function buildPages(data) {
-    stage.innerHTML = "";
-    pages = [];
-    currentPageIdx = 0;
-
-    // Page 0: Title page
-    const titlePage = createPage("page-title");
-    titlePage.innerHTML = `
-      <div class="page-eyebrow">บทที่ ${data.chapter}</div>
-      <h1 class="page-h1">${esc(data.title)}</h1>
-      ${data.subtitle ? `<p class="page-subtitle">${esc(data.subtitle)}</p>` : ""}
-      <div class="page-tap-hint">แตะเพื่ออ่านต่อ</div>
-    `;
-    pages.push(titlePage);
-
-    // Page 1: Hero image (if exists)
-    if (data.heroImage) {
-      const heroPage = createPage("page-image");
-      heroPage.innerHTML = `
-        <figure>
-          <img class="page-hero-img" src="${esc(data.heroImage)}" alt="${esc(data.heroCaption || "")}" loading="eager" />
-          ${data.heroCaption ? `<figcaption class="page-hero-caption">${esc(data.heroCaption)}</figcaption>` : ""}
-        </figure>
-      `;
-      pages.push(heroPage);
-    }
-
-    // Content block pages
-    (data.blocks || []).forEach(b => {
-      switch (b.type) {
-        case "text": {
-          const p = createPage("page-text-wrap");
-          p.innerHTML = `<p class="page-text">${esc(b.body).replace(/\n/g, "<br>")}</p>`;
-          pages.push(p);
-          break;
-        }
-        case "quote": {
-          const p = createPage("page-quote");
-          p.innerHTML = `
-            <span class="mark">&ldquo;</span>
-            <blockquote>${esc(b.body)}</blockquote>
-            ${b.by ? `<cite>${esc(b.by)}</cite>` : ""}
-          `;
-          pages.push(p);
-          break;
-        }
-        case "image": {
-          const p = createPage("page-image");
-          p.innerHTML = `
-            <figure>
-              <img src="${esc(b.src)}" alt="${esc(b.caption || "")}" loading="lazy" />
-              ${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ""}
-            </figure>
-          `;
-          pages.push(p);
-          break;
-        }
-        case "music": {
-          const p = createPage("page-music");
-          p.innerHTML = `
-            <div class="label">now playing</div>
-            <div class="frame">${musicEmbed(b.url)}</div>
-          `;
-          pages.push(p);
-          break;
-        }
-      }
-    });
-
-    // Last page: End of chapter
-    const endPage = createPage("page-end");
-    const idx = chapterList.findIndex(c => c.chapter === data.chapter);
-    const nextCh = idx < chapterList.length - 1 ? chapterList[idx + 1] : null;
-
-    endPage.innerHTML = `
-      <div class="divider"></div>
-      <div class="sig">${esc(APP.signature)}</div>
-      <div class="breathe">breathe ◦ you're okay</div>
-      <div class="page-end-nav">
-        ${nextCh ? `<button class="page-end-btn" id="end-next-ch">บทถัดไป →</button>` : ""}
-        <button class="page-end-btn" id="end-toc">สารบัญ</button>
-      </div>
-    `;
-    pages.push(endPage);
-
-    // Append all pages to stage
-    pages.forEach(p => stage.appendChild(p));
-
-    // Activate first page
-    pages[0].classList.add("active");
-
-    // Wire up end-of-chapter buttons
-    const nextBtn = document.getElementById("end-next-ch");
-    if (nextBtn && nextCh) {
-      nextBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        loadChapter(nextCh.chapter).then(() => {
-          showPage("chapter");
-        });
-      });
-    }
-
-    const tocEndBtn = document.getElementById("end-toc");
-    if (tocEndBtn) {
-      tocEndBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        buildTOC();
-        showPage("toc");
-      });
-    }
-
-    updateProgressUI();
-  }
-
-  function createPage(extraClass) {
-    const div = document.createElement("div");
-    div.className = "page" + (extraClass ? " " + extraClass : "");
-    return div;
-  }
 
   function renderChapter(data) {
     currentChapter = data;
     currentChapterNum = data.chapter;
+
+    // Header
+    eyebrowEl.textContent = `บทที่ ${data.chapter}`;
+    titleEl.textContent = data.title || APP.title;
+    subtitleEl.textContent = data.subtitle || "";
     document.title = `${data.title} — ${APP.title}`;
-    buildPages(data);
+
+    // Hero image
+    if (data.heroImage) {
+      const show = () => { heroFig.hidden = false; heroFig.classList.add("seen"); };
+      heroImg.onload = show;
+      heroImg.onerror = () => { heroFig.hidden = true; };
+      heroImg.alt = data.heroCaption || "";
+      heroImg.src = data.heroImage;
+      heroCap.textContent = data.heroCaption || "";
+      heroFig.hidden = false;
+      heroFig.classList.remove("seen");
+      if (heroImg.complete && heroImg.naturalWidth > 0) show();
+      setTimeout(() => { if (heroImg.naturalWidth > 0) show(); }, 1500);
+    } else {
+      heroFig.hidden = true;
+    }
+
+    // Blocks
+    mainEl.innerHTML = (data.blocks || []).map(renderBlock).join(`<div class="divider"></div>`);
+    observeBlocks();
+
+    // Navigation
+    updateNav();
+
+    // Reset progress bar
+    progressBar.style.width = "0%";
+
+    // Save
     saveProgress();
+  }
+
+  function updateNav() {
+    const idx = chapterList.findIndex(c => c.chapter === currentChapterNum);
+    const prev = idx > 0 ? chapterList[idx - 1] : null;
+    const next = idx < chapterList.length - 1 ? chapterList[idx + 1] : null;
+
+    if (prev) {
+      navPrev.disabled = false;
+      navPrevLabel.textContent = `บทที่ ${prev.chapter}`;
+      navPrev.onclick = () => { loadChapter(prev.chapter); window.scrollTo(0, 0); };
+    } else {
+      navPrev.disabled = true;
+    }
+
+    if (next) {
+      navNext.disabled = false;
+      navNextLabel.textContent = `บทที่ ${next.chapter}`;
+      navNext.onclick = () => { loadChapter(next.chapter); window.scrollTo(0, 0); };
+    } else {
+      navNext.disabled = true;
+    }
   }
 
   /* ═══════════════════════════════════════════
@@ -403,33 +268,23 @@
         const n = parseInt(item.dataset.chapter);
         loadChapter(n).then(() => {
           showPage("chapter");
+          window.scrollTo(0, 0);
         });
       });
     });
   }
 
-  /* ── TOC Events ── */
-  tocBtn.addEventListener("click", () => {
-    buildTOC();
-    showPage("toc");
-  });
+  tocBtn.addEventListener("click", () => { buildTOC(); showPage("toc"); });
 
   tocClose.addEventListener("click", () => {
-    if (currentChapterNum > 0) {
-      showPage("chapter");
-    } else {
-      showPage("home");
-    }
+    if (currentChapterNum > 0) showPage("chapter");
+    else showPage("home");
   });
 
-  // Click outside TOC list to close
   tocPage.addEventListener("click", (e) => {
     if (e.target === tocPage) {
-      if (currentChapterNum > 0) {
-        showPage("chapter");
-      } else {
-        showPage("home");
-      }
+      if (currentChapterNum > 0) showPage("chapter");
+      else showPage("home");
     }
   });
 
@@ -438,12 +293,11 @@
      ═══════════════════════════════════════════ */
 
   document.getElementById("home-start-btn").addEventListener("click", () => {
-    loadChapter(1).then(() => showPage("chapter"));
+    loadChapter(1).then(() => { showPage("chapter"); window.scrollTo(0, 0); });
   });
 
   document.getElementById("home-toc-btn").addEventListener("click", () => {
-    buildTOC();
-    showPage("toc");
+    buildTOC(); showPage("toc");
   });
 
   homeResume.addEventListener("click", () => {
@@ -451,11 +305,25 @@
     if (p.currentChapter > 0) {
       loadChapter(p.currentChapter).then(() => {
         showPage("chapter");
-        // Restore page position
-        if (p.currentPage > 0 && p.currentPage < pages.length) {
-          setTimeout(() => goToPage(p.currentPage, "forward"), 100);
+        if (p.currentScrollPosition > 0) {
+          setTimeout(() => {
+            const target = p.currentScrollPosition * (document.body.scrollHeight - window.innerHeight);
+            window.scrollTo(0, target);
+          }, 300);
         }
       });
+    }
+  });
+
+  /* ── Keyboard shortcut ── */
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (tocPage.classList.contains("active")) {
+        if (currentChapterNum > 0) showPage("chapter");
+        else showPage("home");
+      } else if (chapterView.classList.contains("active")) {
+        buildTOC(); showPage("toc");
+      }
     }
   });
 
@@ -470,7 +338,7 @@
         resolve(data);
       };
       loadScript(`chapters/chapter-${n}.js`).catch(() => {
-        stage.innerHTML = `<div class="page active page-text-wrap"><p class="page-text">ไม่พบบทที่ ${n}</p></div>`;
+        mainEl.innerHTML = `<div class="block b-text seen"><p>ไม่พบบทที่ ${n}</p></div>`;
         resolve(null);
       });
     });
@@ -487,15 +355,16 @@
     const progress = getProgress();
 
     if (progress.currentChapter > 0) {
-      // Returning reader — resume
       loadChapter(progress.currentChapter).then(() => {
         showPage("chapter");
-        if (progress.currentPage > 0 && progress.currentPage < pages.length) {
-          setTimeout(() => goToPage(progress.currentPage, "forward"), 150);
+        if (progress.currentScrollPosition > 0) {
+          setTimeout(() => {
+            const target = progress.currentScrollPosition * (document.body.scrollHeight - window.innerHeight);
+            window.scrollTo(0, target);
+          }, 300);
         }
       });
     } else {
-      // First visit — home page
       showPage("home");
     }
   };
@@ -518,7 +387,8 @@
   }
 
   /* ═══════════════════════════════════════════
-     WEBGL LIVING GRADIENT (shadergradient-inspired)
+     WEBGL LIVING GRADIENT — shadergradient.co inspired
+     More vibrant, more movement, more alive
      ═══════════════════════════════════════════ */
 
   const canvas = document.getElementById("gradient");
@@ -533,14 +403,18 @@
   const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
   const fs = `
     precision highp float;
-    uniform vec2 u_res; uniform float u_t;
+    uniform vec2 u_res;
+    uniform float u_t;
 
-    vec3 cA = vec3(0.937, 0.902, 0.823);
-    vec3 cB = vec3(0.855, 0.890, 0.870);
-    vec3 cC = vec3(0.900, 0.920, 0.910);
-    vec3 cD = vec3(0.925, 0.880, 0.835);
-    vec3 cE = vec3(0.880, 0.900, 0.890);
+    /* richer palette — inspired by shadergradient warm-sage-cream */
+    vec3 cA = vec3(0.941, 0.906, 0.820);   /* warm cream base        */
+    vec3 cB = vec3(0.420, 0.565, 0.498);   /* sage green (richer)    */
+    vec3 cC = vec3(0.760, 0.830, 0.790);   /* light sage mist        */
+    vec3 cD = vec3(0.910, 0.835, 0.750);   /* warm sand/amber        */
+    vec3 cE = vec3(0.620, 0.750, 0.700);   /* mid sage               */
+    vec3 cF = vec3(0.850, 0.780, 0.720);   /* dusty rose hint        */
 
+    /* simplex noise */
     vec3 mod289(vec3 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
     vec2 mod289v2(vec2 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
     vec3 permute(vec3 x){ return mod289((x * 34.0 + 1.0) * x); }
@@ -571,27 +445,40 @@
 
     void main(){
       vec2 uv = gl_FragCoord.xy / u_res;
-      uv.x *= u_res.x / u_res.y;
-      float t = u_t * 0.06;
+      float aspect = u_res.x / u_res.y;
+      uv.x *= aspect;
+      float t = u_t * 0.08;  /* slightly faster movement */
 
+      /* multiple noise layers at different scales and speeds */
+      float n1 = snoise(uv * 1.2 + vec2(t * 0.35, t * 0.25))      * 0.5 + 0.5;
+      float n2 = snoise(uv * 2.0 - vec2(t * 0.2, t * 0.3) + 5.0)  * 0.5 + 0.5;
+      float n3 = snoise(uv * 0.7 + vec2(t * 0.15, -t * 0.18) + 10.0) * 0.5 + 0.5;
+      float n4 = snoise(uv * 3.0 + vec2(-t * 0.1, t * 0.12) + 20.0) * 0.5 + 0.5;
+
+      /* diagonal flow */
       float diag = (uv.x + uv.y) * 0.5;
 
-      float n1 = snoise(uv * 1.4 + vec2(t * 0.3, t * 0.2)) * 0.5 + 0.5;
-      float n2 = snoise(uv * 2.2 - vec2(t * 0.15, t * 0.25) + 5.0) * 0.5 + 0.5;
-      float n3 = snoise(uv * 0.8 + vec2(t * 0.1, -t * 0.12) + 10.0) * 0.5 + 0.5;
+      /* blend zones — stronger mixing for more visible color flow */
+      float zone1 = smoothstep(0.15, 0.65, diag + n1 * 0.45 - 0.15);
+      float zone2 = smoothstep(0.2, 0.75, n2 + diag * 0.35);
+      float zone3 = smoothstep(0.2, 0.7, n3);
+      float zone4 = smoothstep(0.3, 0.8, n4 * 0.7 + diag * 0.3);
 
-      float zone1 = smoothstep(0.2, 0.7, diag + n1 * 0.4 - 0.15);
-      float zone2 = smoothstep(0.3, 0.8, n2 + diag * 0.3);
-      float zone3 = smoothstep(0.25, 0.75, n3);
-
+      /* build color — more visible tinting */
       vec3 col = cA;
-      col = mix(col, cD, zone1 * 0.25);
-      col = mix(col, cB, zone2 * 0.2);
-      col = mix(col, cC, zone3 * 0.15);
-      col = mix(col, cE, (1.0 - zone1) * n3 * 0.12);
+      col = mix(col, cD, zone1 * 0.40);       /* warm sand sweep   */
+      col = mix(col, cB, zone2 * 0.30);       /* sage green blobs  */
+      col = mix(col, cC, zone3 * 0.25);       /* light sage mist   */
+      col = mix(col, cE, (1.0 - zone1) * n3 * 0.20); /* mid sage pockets */
+      col = mix(col, cF, zone4 * 0.15);       /* dusty warmth      */
 
+      /* subtle highlight shimmer */
+      float shimmer = snoise(uv * 4.0 + vec2(t * 0.5, t * 0.3)) * 0.5 + 0.5;
+      col += vec3(0.02) * shimmer * (1.0 - zone1);
+
+      /* soft vignette */
       vec2 vc = gl_FragCoord.xy / u_res - 0.5;
-      col = mix(col, cA, smoothstep(0.3, 1.0, length(vc)) * 0.55);
+      col = mix(col, cA, smoothstep(0.25, 1.0, length(vc)) * 0.45);
 
       gl_FragColor = vec4(col, 1.0);
     }`;

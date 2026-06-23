@@ -31,13 +31,11 @@
 
 <!-- Living gradient background -->
 <canvas id="gradient"></canvas>
+<div id="grain"></div>
 <div id="veil"></div>
 
 <!-- Reading progress bar -->
 <div id="progress-bar"></div>
-
-<!-- Page counter -->
-<div id="page-counter"></div>
 
 <!-- TOC Button -->
 <button id="toc-btn" aria-label="สารบัญ" title="สารบัญ">
@@ -69,12 +67,40 @@
   </div>
 </section>
 
-<!-- Chapter View (page-based reader) -->
+<!-- Chapter View (scroll-based reader) -->
 <div id="chapter-view">
-  <div id="stage"></div>
-  <!-- Invisible tap zones -->
-  <div class="tap-zone tap-zone-prev" id="tap-prev"></div>
-  <div class="tap-zone tap-zone-next" id="tap-next"></div>
+  <header class="hero">
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="title"></h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="scroll-cue">
+      <span class="scroll-cue-line"></span>
+      <span class="scroll-cue-dot"></span>
+    </div>
+  </header>
+
+  <figure class="hero-img wrap" id="heroFig" hidden>
+    <img id="heroImg" alt="" />
+    <figcaption id="heroCap"></figcaption>
+  </figure>
+
+  <main class="wrap" id="main"></main>
+
+  <!-- Chapter Navigation -->
+  <nav class="chapter-nav" id="chapter-nav">
+    <button class="chapter-nav-btn" id="nav-prev" disabled>
+      <span class="arrow">←</span> <span id="nav-prev-label"></span>
+    </button>
+    <button class="chapter-nav-btn" id="nav-next" disabled>
+      <span id="nav-next-label"></span> <span class="arrow">→</span>
+    </button>
+  </nav>
+
+  <footer>
+    <div class="divider"></div>
+    <div class="breathe sig">SAP by Teera</div>
+    <div class="breathe">breathe ◦ you're okay</div>
+  </footer>
 </div>
 
 <!-- App Engine -->
