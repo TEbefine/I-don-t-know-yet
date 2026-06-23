@@ -294,143 +294,8 @@ body {
   text-align: right;
 }
 
-/* ═══════════════════════════════════════════
-   HOME PAGE — Book Cover
-   ═══════════════════════════════════════════ */
 
-#home-page {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
-  transform: scale(0.98);
-}
 
-#home-page.active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: scale(1);
-}
-
-.home-cover {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 440px;
-  width: 100%;
-}
-
-.home-cover-img {
-  width: 200px;
-  height: 320px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(42, 42, 46, 0.22);
-  margin-bottom: var(--space-6);
-  transition: transform 0.6s var(--ease);
-}
-
-.home-cover-img:hover {
-  transform: scale(1.03) translateY(-4px);
-}
-
-.home-cover-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.home-title {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: clamp(2.4rem, 2rem + 2vw, 3.8rem);
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  margin-bottom: 8px;
-}
-
-.home-subtitle {
-  font-family: var(--sans);
-  font-weight: 300;
-  font-size: 0.95rem;
-  color: var(--ink-soft);
-  margin-bottom: var(--space-5);
-  font-style: italic;
-}
-
-.home-resume {
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--sage);
-  margin-bottom: var(--space-5);
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  display: none;
-  transition: background 0.3s var(--ease);
-}
-
-.home-resume:hover {
-  background: var(--sage-dim);
-}
-
-.home-resume.visible {
-  display: block;
-}
-
-.home-actions {
-  display: flex;
-  gap: 16px;
-  width: 100%;
-  justify-content: center;
-}
-
-.home-btn {
-  font-family: var(--sans);
-  font-size: 0.95rem;
-  font-weight: 500;
-  padding: 12px 32px;
-  border-radius: 30px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s var(--ease);
-}
-
-.home-btn.primary {
-  background: var(--sage);
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(107, 144, 128, 0.25);
-}
-
-.home-btn.primary:hover {
-  background: #5a7d6e;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(107, 144, 128, 0.35);
-}
-
-.home-btn.secondary {
-  background: var(--panel);
-  color: var(--ink-soft);
-  border: 1px solid var(--hair);
-}
-
-.home-btn.secondary:hover {
-  background: var(--paper);
-  color: var(--ink);
-  transform: translateY(-2px);
-}
 
 /* ═══════════════════════════════════════════
    CHAPTER VIEW — Scroll-based Reader
@@ -488,56 +353,36 @@ h1 {
   font-style: italic;
 }
 
-/* ── Scroll Cue — Creative Minimal ── */
+/* ── Scroll Cue — Three Cascading Dots ── */
 .scroll-cue {
   margin-top: var(--space-8);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
-}
-
-.scroll-cue-line {
-  width: 1px;
-  height: 32px;
-  background: linear-gradient(to bottom, transparent, var(--ink-faint));
-  animation: scroll-line 2.4s var(--ease) infinite;
-  transform-origin: top;
-}
-
-@keyframes scroll-line {
-  0% { 
-    opacity: 0;
-    transform: scaleY(0);
-  }
-  30% {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  70% {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scaleY(0);
-    transform-origin: bottom;
-  }
+  gap: 10px;
 }
 
 .scroll-cue-dot {
-  width: 3px;
-  height: 3px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--ink-faint);
-  animation: scroll-dot 2.4s var(--ease) infinite;
+  opacity: 0;
+  animation: scroll-cascade 2s var(--ease) infinite;
 }
 
-@keyframes scroll-dot {
-  0%, 30% { opacity: 0; transform: translateY(-4px); }
-  50% { opacity: 1; transform: translateY(0); }
+.scroll-cue-dot:nth-child(1) { animation-delay: 0s; }
+.scroll-cue-dot:nth-child(2) { animation-delay: 0.25s; }
+.scroll-cue-dot:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes scroll-cascade {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  30%  { opacity: 1; transform: translateY(0); }
+  60%  { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(6px); }
 }
+
+
 
 /* ── Content Blocks (scroll reveal) ── */
 main {
@@ -734,19 +579,9 @@ footer .breathe { margin-top: var(--space-4); }
 
 @media (prefers-reduced-motion: reduce) {
   .block, .hero-img { opacity: 1; transform: none; transition: none; }
-  .scroll-cue-line, .scroll-cue-dot { animation: none; }
+  .scroll-cue-dot { animation: none; }
   html { scroll-behavior: auto; }
-  #toc-page, #chapter-view, #home-page { transition: none; }
+  #toc-page, #chapter-view { transition: none; }
   #progress-bar { transition: none; }
 }
 
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════ */
-
-@media (max-width: 480px) {
-  .home-cover-img {
-    width: 160px;
-    height: 260px;
-  }
-}

@@ -18,7 +18,7 @@
   const tocListEl    = document.getElementById("toc-list");
   const tocBtn       = document.getElementById("toc-btn");
   const tocClose     = document.getElementById("toc-close");
-  const homePage     = document.getElementById("home-page");
+
   const chapterView  = document.getElementById("chapter-view");
   const titleEl      = document.getElementById("title");
   const subtitleEl   = document.getElementById("subtitle");
@@ -32,7 +32,7 @@
   const navPrevLabel = document.getElementById("nav-prev-label");
   const navNextLabel = document.getElementById("nav-next-label");
   const progressBar  = document.getElementById("progress-bar");
-  const homeResume   = document.getElementById("home-resume");
+
 
   /* ── Helpers ── */
   const esc = s => String(s == null ? "" : s)
@@ -140,18 +140,12 @@
      ═══════════════════════════════════════════ */
 
   function showPage(pageId) {
-    homePage.classList.remove("active");
     chapterView.classList.remove("active");
     tocPage.classList.remove("active");
     progressBar.classList.remove("visible");
     tocBtn.classList.remove("visible");
 
-    if (pageId === "home") {
-      homePage.classList.add("active");
-      document.body.style.overflow = "hidden";
-      updateHomeResume();
-      window.scrollTo(0, 0);
-    } else if (pageId === "chapter") {
+    if (pageId === "chapter") {
       chapterView.classList.add("active");
       document.body.style.overflow = "";
       progressBar.classList.add("visible");
@@ -160,19 +154,6 @@
       tocPage.classList.add("active");
       document.body.style.overflow = "hidden";
     }
-  }
-
-  function updateHomeResume() {
-    const p = getProgress();
-    if (p.currentChapter > 0) {
-      const ch = chapterList.find(c => c.chapter === p.currentChapter);
-      if (ch) {
-        homeResume.textContent = `อ่านค้างไว้ — ${ch.title}`;
-        homeResume.classList.add("visible");
-        return;
-      }
-    }
-    homeResume.classList.remove("visible");
   }
 
   /* ═══════════════════════════════════════════
@@ -277,41 +258,12 @@
   tocBtn.addEventListener("click", () => { buildTOC(); showPage("toc"); });
 
   tocClose.addEventListener("click", () => {
-    if (currentChapterNum > 0) showPage("chapter");
-    else showPage("home");
+    showPage("chapter");
   });
 
   tocPage.addEventListener("click", (e) => {
     if (e.target === tocPage) {
-      if (currentChapterNum > 0) showPage("chapter");
-      else showPage("home");
-    }
-  });
-
-  /* ═══════════════════════════════════════════
-     HOME PAGE
-     ═══════════════════════════════════════════ */
-
-  document.getElementById("home-start-btn").addEventListener("click", () => {
-    loadChapter(1).then(() => { showPage("chapter"); window.scrollTo(0, 0); });
-  });
-
-  document.getElementById("home-toc-btn").addEventListener("click", () => {
-    buildTOC(); showPage("toc");
-  });
-
-  homeResume.addEventListener("click", () => {
-    const p = getProgress();
-    if (p.currentChapter > 0) {
-      loadChapter(p.currentChapter).then(() => {
-        showPage("chapter");
-        if (p.currentScrollPosition > 0) {
-          setTimeout(() => {
-            const target = p.currentScrollPosition * (document.body.scrollHeight - window.innerHeight);
-            window.scrollTo(0, target);
-          }, 300);
-        }
-      });
+      showPage("chapter");
     }
   });
 
@@ -319,8 +271,7 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (tocPage.classList.contains("active")) {
-        if (currentChapterNum > 0) showPage("chapter");
-        else showPage("home");
+        showPage("chapter");
       } else if (chapterView.classList.contains("active")) {
         buildTOC(); showPage("toc");
       }
@@ -353,20 +304,17 @@
     buildTOC();
 
     const progress = getProgress();
+    const startChapter = progress.currentChapter > 0 ? progress.currentChapter : 1;
 
-    if (progress.currentChapter > 0) {
-      loadChapter(progress.currentChapter).then(() => {
-        showPage("chapter");
-        if (progress.currentScrollPosition > 0) {
-          setTimeout(() => {
-            const target = progress.currentScrollPosition * (document.body.scrollHeight - window.innerHeight);
-            window.scrollTo(0, target);
-          }, 300);
-        }
-      });
-    } else {
-      showPage("home");
-    }
+    loadChapter(startChapter).then(() => {
+      showPage("chapter");
+      if (progress.currentChapter > 0 && progress.currentScrollPosition > 0) {
+        setTimeout(() => {
+          const target = progress.currentScrollPosition * (document.body.scrollHeight - window.innerHeight);
+          window.scrollTo(0, target);
+        }, 300);
+      }
+    });
   };
 
   loadScript("chapters/index.js").catch(() => {
