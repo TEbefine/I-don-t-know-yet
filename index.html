@@ -274,28 +274,79 @@ const MY_SPACE = {
   const canvas = document.getElementById("gradient");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-  if (!gl) { canvas.style.background = "linear-gradient(140deg,#eee3cc 0%,#bcd0c9 45%,#9fb8b2 70%,#e7d8c2 100%)"; return; }
+  if (!gl) { canvas.style.background = "linear-gradient(135deg,#efe6d2 0%,#bcd0c9 40%,#6B9080 65%,#e1be9c 100%)"; return; }
 
   const vs = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
   const fs = `
     precision highp float;
     uniform vec2 u_res; uniform float u_t;
-    vec3 cA = vec3(0.937,0.902,0.823);
-    vec3 cB = vec3(0.612,0.722,0.698);
-    vec3 cC = vec3(0.486,0.612,0.596);
-    vec3 cD = vec3(0.882,0.745,0.612);
-    vec3 cE = vec3(0.694,0.776,0.768);
-    float wave(vec2 uv,float t){ return sin(uv.x*2.6+t)+sin(uv.y*2.1-t*0.8)+sin((uv.x+uv.y)*1.7+t*0.6)+sin((uv.x-uv.y)*2.3-t*0.5); }
+
+    /* SAP palette — very soft tints, close to paper */
+    vec3 cA = vec3(0.937, 0.902, 0.823);   /* warm cream  — base        */
+    vec3 cB = vec3(0.855, 0.890, 0.870);   /* pale sage hint            */
+    vec3 cC = vec3(0.900, 0.920, 0.910);   /* barely-there sage mist    */
+    vec3 cD = vec3(0.925, 0.880, 0.835);   /* faint warm sand           */
+    vec3 cE = vec3(0.880, 0.900, 0.890);   /* whisper sage              */
+
+    /* 2D simplex noise — produces organic blobs */
+    vec3 mod289(vec3 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
+    vec2 mod289v2(vec2 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
+    vec3 permute(vec3 x){ return mod289((x * 34.0 + 1.0) * x); }
+    float snoise(vec2 v){
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                         -0.577350269189626, 0.024390243902439);
+      vec2 i = floor(v + dot(v, C.yy));
+      vec2 x0 = v - i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0,0.0) : vec2(0.0,1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod289v2(i);
+      vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
+                                   + i.x + vec3(0.0, i1.x, 1.0));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+                               dot(x12.zw,x12.zw)), 0.0);
+      m = m * m; m = m * m;
+      vec3 x_ = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x_) - 0.5;
+      vec3 ox = floor(x_ + 0.5);
+      vec3 a0 = x_ - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+      vec3 g;
+      g.x = a0.x * x0.x + h.x * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
     void main(){
-      vec2 uv = gl_FragCoord.xy/u_res; uv.x *= u_res.x/u_res.y;
-      float t = u_t*0.18;
-      vec2 w = vec2(wave(uv,t),wave(uv+3.7,t+1.3))*0.18;
-      float f = wave(uv+w,t)/4.0; float g = wave(uv*0.7-w,t*0.8+5.0)/4.0;
-      float a = smoothstep(-1.0,1.0,f); float b = smoothstep(-1.0,1.0,g);
-      vec3 col = mix(cA,cB,a); col = mix(col,cC,b*0.7); col = mix(col,cD,a*b); col = mix(col,cE,(1.0-a)*0.4);
-      vec2 c = gl_FragCoord.xy/u_res - 0.5;
-      col = mix(col,cA,smoothstep(0.35,0.95,length(c))*0.45);
-      gl_FragColor = vec4(col,1.0);
+      vec2 uv = gl_FragCoord.xy / u_res;
+      uv.x *= u_res.x / u_res.y;
+      float t = u_t * 0.06;
+
+      /* diagonal coordinate — gentle Sunset sweep */
+      float diag = (uv.x + uv.y) * 0.5;
+
+      /* layered organic noise at different scales */
+      float n1 = snoise(uv * 1.4 + vec2(t * 0.3, t * 0.2)) * 0.5 + 0.5;
+      float n2 = snoise(uv * 2.2 - vec2(t * 0.15, t * 0.25) + 5.0) * 0.5 + 0.5;
+      float n3 = snoise(uv * 0.8 + vec2(t * 0.1, -t * 0.12) + 10.0) * 0.5 + 0.5;
+
+      /* blend zones */
+      float zone1 = smoothstep(0.2, 0.7, diag + n1 * 0.4 - 0.15);
+      float zone2 = smoothstep(0.3, 0.8, n2 + diag * 0.3);
+      float zone3 = smoothstep(0.25, 0.75, n3);
+
+      /* build final color — very gentle tints over cream */
+      vec3 col = cA;
+      col = mix(col, cD, zone1 * 0.25);
+      col = mix(col, cB, zone2 * 0.2);
+      col = mix(col, cC, zone3 * 0.15);
+      col = mix(col, cE, (1.0 - zone1) * n3 * 0.12);
+
+      /* soft vignette — fade edges to cream */
+      vec2 vc = gl_FragCoord.xy / u_res - 0.5;
+      col = mix(col, cA, smoothstep(0.3, 1.0, length(vc)) * 0.55);
+
+      gl_FragColor = vec4(col, 1.0);
     }`;
   function compile(t,s){ const sh=gl.createShader(t); gl.shaderSource(sh,s); gl.compileShader(sh); return sh; }
   const prog = gl.createProgram();
