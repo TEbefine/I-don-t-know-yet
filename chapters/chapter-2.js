@@ -4,7 +4,7 @@ window.__SAP_CHAPTER__({
   chapter: 2,
   title: "ข้างนอกหน้าต่าง",
   subtitle: "โลกที่มีทั้งคมและอุ่น",
-  heroImage: "SAP-02.png",
+  heroImage: "SAP-02.webp",
   heroCaption: "ออกไปข้างนอก แล้วจึงรู้ว่าทำไมต้องมีบ้านให้กลับ",
 
   blocks: [

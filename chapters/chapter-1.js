@@ -4,7 +4,7 @@ window.__SAP_CHAPTER__({
   chapter: 1,
   title: "คืนที่เบาที่สุด",
   subtitle: "ฉากแรก",
-  heroImage: "SAP-01.png",
+  heroImage: "SAP-01.webp",
   heroCaption: "ห้องเล็ก ๆ ที่หายใจได้",
 
   blocks: [

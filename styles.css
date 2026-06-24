@@ -3,12 +3,10 @@
    A quiet storybook on the web
    ═══════════════════════════════════════════ */
 
-/* ── Custom Fonts ── */
-@font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-thin.ttf") format("truetype"); font-weight: 100; font-display: swap; }
+/* ── Custom Fonts (only weights actually used) ── */
 @font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-light.ttf") format("truetype"); font-weight: 300; font-display: swap; }
 @font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
-@font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-Heavy.ttf") format("truetype"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "EkkamaiVibe"; src: url("EkkamaiVibe/EkkamaiVibe-Bold.ttf") format("truetype"); font-weight: 700; font-display: optional; }
 
 /* ── Design Tokens ── */
 :root {

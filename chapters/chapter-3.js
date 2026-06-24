@@ -4,7 +4,7 @@ window.__SAP_CHAPTER__({
   chapter: 3,
   title: "ดอกที่ไม่ได้บาน",
   subtitle: "ทุ่งดอกไม้ในความมืด",
-  heroImage: "SAP-03.png",
+  heroImage: "SAP-03.webp",
   heroCaption: "บางดอก ส่งกลิ่นหอมที่สุดในวันที่มันยอมปล่อย",
 
   blocks: [

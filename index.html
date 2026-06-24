@@ -19,13 +19,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Sap" />
 
-  <!-- Fonts -->
+  <!-- Preload critical fonts (eliminates render-blocking) -->
+  <link rel="preload" href="EkkamaiVibe/EkkamaiVibe-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="preload" href="EkkamaiVibe/EkkamaiVibe-light.ttf" as="font" type="font/ttf" crossorigin />
+
+  <!-- Google Fonts (non-critical, loaded async) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 
   <!-- Styles -->
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" fetchpriority="high" />
 </head>
 <body>
 

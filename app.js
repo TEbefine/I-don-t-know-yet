@@ -51,7 +51,7 @@
     switch (b.type) {
       case "text":  return `<div class="block b-text"><p>${esc(b.body).replace(/\n/g,"<br>")}</p></div>`;
       case "quote": return `<div class="block b-quote"><span class="mark">&ldquo;</span><blockquote>${esc(b.body)}</blockquote>${b.by?`<cite>${esc(b.by)}</cite>`:""}</div>`;
-      case "image": return `<div class="block b-image"><figure><img src="${esc(b.src)}" alt="${esc(b.caption||"")}" loading="lazy" />${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:""}</figure></div>`;
+      case "image": return `<div class="block b-image"><figure><img src="${esc(b.src)}" alt="${esc(b.caption||"")}" loading="lazy" decoding="async" />${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:""}</figure></div>`;
       case "music": return `<div class="block b-music"><div class="label">now playing</div><div class="frame">${musicEmbed(b.url)}</div></div>`;
       default:      return "";
     }
@@ -120,18 +120,24 @@
 
   /* ── Scroll listener: save progress + progress bar + mark read ── */
   let scrollTimer;
+  let scrollTicking = false;
   window.addEventListener("scroll", () => {
-    if (currentChapterNum > 0) {
-      // Update progress bar
-      const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
-      progressBar.style.width = (scrollPct * 100) + "%";
+    if (currentChapterNum > 0 && !scrollTicking) {
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        // Update progress bar
+        const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+        progressBar.style.width = (scrollPct * 100) + "%";
 
-      // Debounced save
+        // Mark chapter read near bottom
+        if (scrollPct > 0.9) markChapterRead(currentChapterNum);
+
+        scrollTicking = false;
+      });
+
+      // Debounced save (outside rAF — doesn't need rendering)
       clearTimeout(scrollTimer);
       scrollTimer = setTimeout(saveProgress, 400);
-
-      // Mark chapter read near bottom
-      if (scrollPct > 0.9) markChapterRead(currentChapterNum);
     }
   });
 
@@ -176,6 +182,7 @@
       heroImg.onload = show;
       heroImg.onerror = () => { heroFig.hidden = true; };
       heroImg.alt = data.heroCaption || "";
+      heroImg.decoding = "async";
       heroImg.src = data.heroImage;
       heroCap.textContent = data.heroCaption || "";
       heroFig.hidden = false;
@@ -344,7 +351,7 @@
   const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
   if (!gl) {
-    canvas.style.background = "linear-gradient(135deg, #f7f5f0 0%, #e8ede9 40%, #dfe8e3 60%, #f2efe8 100%)";
+    canvas.style.background = "linear-gradient(135deg, #f7f5f0 0%, #d4e6db 40%, #e8d8c4 60%, #f2efe8 100%)";
     return;
   }
 
@@ -354,12 +361,13 @@
     uniform vec2 u_res;
     uniform float u_t;
 
-    /* soft pastel palette — like watercolor paper */
-    vec3 c1 = vec3(0.965, 0.957, 0.940);   /* warm cream #F7F4F0      */
-    vec3 c2 = vec3(0.880, 0.915, 0.895);   /* pale sage #E1E9E4       */
-    vec3 c3 = vec3(0.910, 0.935, 0.920);   /* soft mint #E8EFE9       */
-    vec3 c4 = vec3(0.945, 0.930, 0.910);   /* warm sand #F1EDE8       */
-    vec3 c5 = vec3(0.870, 0.900, 0.880);   /* sage mist #DEE6E0       */
+    /* expanded palette — more separation for visible flow */
+    vec3 c1 = vec3(0.965, 0.957, 0.940);   /* warm cream  #F7F4F0   */
+    vec3 c2 = vec3(0.830, 0.900, 0.855);   /* sage green  #D4E6DA   */
+    vec3 c3 = vec3(0.880, 0.920, 0.895);   /* soft mint   #E1EBE4   */
+    vec3 c4 = vec3(0.920, 0.890, 0.840);   /* warm honey  #EBE3D6   */
+    vec3 c5 = vec3(0.820, 0.870, 0.850);   /* deep sage   #D1DED9   */
+    vec3 c6 = vec3(0.910, 0.870, 0.810);   /* warm amber  #E8DEC9   */
 
     /* simplex noise */
     vec3 mod289(vec3 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
@@ -396,35 +404,47 @@
       vec2 p = uv;
       p.x *= aspect;
 
-      /* very slow, gentle movement */
-      float t = u_t * 0.025;
+      /* faster, dreamier movement */
+      float t = u_t * 0.06;
 
-      /* large soft undulations */
-      float w1 = snoise(p * 0.6 + vec2(t * 0.18, t * 0.12))       * 0.5 + 0.5;
-      float w2 = snoise(p * 0.8 - vec2(t * 0.10, -t * 0.15) + 4.0) * 0.5 + 0.5;
-      float w3 = snoise(p * 0.4 + vec2(-t * 0.08, t * 0.10) + 8.0) * 0.5 + 0.5;
-      float w4 = snoise(p * 0.9 + vec2(t * 0.06, t * 0.14) + 12.0) * 0.5 + 0.5;
+      /* breathing pulse — the whole scene gently inhales/exhales */
+      float breathe = sin(t * 0.4) * 0.5 + 0.5;
 
-      /* gentle diagonal flow */
+      /* primary large undulations */
+      float w1 = snoise(p * 0.7 + vec2(t * 0.22, t * 0.15))        * 0.5 + 0.5;
+      float w2 = snoise(p * 0.9 - vec2(t * 0.14, -t * 0.18) + 4.0) * 0.5 + 0.5;
+      float w3 = snoise(p * 0.5 + vec2(-t * 0.12, t * 0.16) + 8.0) * 0.5 + 0.5;
+      float w4 = snoise(p * 1.1 + vec2(t * 0.10, t * 0.20) + 12.0) * 0.5 + 0.5;
+
+      /* secondary detail octave — fine ripples */
+      float d1 = snoise(p * 1.8 + vec2(t * 0.30, -t * 0.25) + 20.0) * 0.5 + 0.5;
+      float d2 = snoise(p * 2.2 - vec2(t * 0.20, t * 0.35) + 28.0) * 0.5 + 0.5;
+
+      /* diagonal flow */
       float diag = (p.x * 0.707 + p.y * 0.707);
 
-      /* very soft blend zones */
-      float f1 = smoothstep(0.2, 0.8, w1 + diag * 0.2);
-      float f2 = smoothstep(0.25, 0.75, w2 * 0.6 + w3 * 0.4);
-      float f3 = smoothstep(0.3, 0.7, w3 + (1.0 - diag) * 0.15);
-      float f4 = smoothstep(0.2, 0.8, w4 * 0.5 + w1 * 0.5);
+      /* blend zones with more contrast */
+      float f1 = smoothstep(0.15, 0.85, w1 + diag * 0.25);
+      float f2 = smoothstep(0.20, 0.80, w2 * 0.55 + w3 * 0.45);
+      float f3 = smoothstep(0.20, 0.80, w3 + (1.0 - diag) * 0.20);
+      float f4 = smoothstep(0.15, 0.85, w4 * 0.5 + w1 * 0.5);
+      float fd = smoothstep(0.3, 0.7, d1 * 0.6 + d2 * 0.4);
 
-      /* gentle color blending — all very subtle */
-      vec3 col = c1;                              /* warm cream base     */
-      col = mix(col, c2, f1 * 0.45);              /* pale sage wash      */
-      col = mix(col, c3, f2 * 0.35);              /* soft mint hints     */
-      col = mix(col, c4, (1.0 - f1) * 0.30);      /* warm sand areas     */
-      col = mix(col, c5, f3 * f4 * 0.25);          /* sage mist pockets   */
-      col = mix(col, c1, f4 * 0.20);              /* cream highlights    */
+      /* richer color blending — visible but still peaceful */
+      vec3 col = c1;                                /* warm cream base     */
+      col = mix(col, c2, f1 * 0.55);                /* sage green wash     */
+      col = mix(col, c3, f2 * 0.50);                /* soft mint flow      */
+      col = mix(col, c4, (1.0 - f1) * 0.45);        /* warm honey areas    */
+      col = mix(col, c5, f3 * f4 * 0.40);            /* deep sage pockets   */
+      col = mix(col, c6, fd * 0.30 * breathe);       /* amber glow breathes */
+      col = mix(col, c1, f4 * 0.18);                /* cream highlights    */
 
-      /* very soft vignette */
+      /* subtle detail shimmer from second octave */
+      col += (d1 - 0.5) * 0.025;
+
+      /* soft vignette */
       vec2 vc = gl_FragCoord.xy / u_res - 0.5;
-      col = mix(col, c1, smoothstep(0.3, 1.1, length(vc)) * 0.35);
+      col = mix(col, c1, smoothstep(0.3, 1.1, length(vc)) * 0.30);
 
       gl_FragColor = vec4(col, 1.0);
     }`;
@@ -455,18 +475,29 @@
   const uT   = gl.getUniformLocation(prog, "u_t");
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
+    /* DPR capped at 1.0 — background doesn't need Retina, massive GPU savings */
+    const dpr = 1.0;
     canvas.width  = Math.floor(innerWidth * dpr);
     canvas.height = Math.floor(innerHeight * dpr);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(uRes, canvas.width, canvas.height);
   }
 
-  window.addEventListener("resize", resize);
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 100);
+  });
   resize();
 
   const start = performance.now();
+  let lastFrame = 0;
   function frame(now) {
+    /* Skip frames if device is struggling (< 20fps) */
+    const delta = now - lastFrame;
+    if (delta < 16) { requestAnimationFrame(frame); return; }
+    lastFrame = now;
+
     gl.uniform1f(uT, (now - start) / 1000);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (!reduce) requestAnimationFrame(frame);

@@ -4,7 +4,7 @@ window.__SAP_CHAPTER__({
   chapter: 4,
   title: "ลอย",
   subtitle: "ที่ที่ไม่ต้องเป็นอะไรนอกจากตัวเอง",
-  heroImage: "SAP-04.png",
+  heroImage: "SAP-04.webp",
   heroCaption: "บางที่ ที่เราไม่ต้องไปถึงไหนเลยก็ได้",
 
   blocks: [
