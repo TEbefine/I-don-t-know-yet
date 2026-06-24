@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sap-cache-v3';
+const CACHE_NAME = 'sap-cache-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const ASSETS = [
   './chapters/chapter-1.js',
   './chapters/chapter-2.js',
   './chapters/chapter-3.js',
+  './chapters/chapter-4.js',
+  './chapters/chapter-5.js',
   './SAP-01.png',
   './SAP-02.png',
   './EkkamaiVibe/EkkamaiVibe-thin.ttf',
