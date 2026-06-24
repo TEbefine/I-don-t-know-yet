@@ -17,5 +17,10 @@ window.__SAP_CHAPTERS__([
     chapter: 3,
     title: "ดอกที่ไม่ได้บาน",
     subtitle: "ทุ่งดอกไม้ในความมืด"
+  },
+  {
+    chapter: 4,
+    title: "ลอย",
+    subtitle: "ที่ที่ไม่ต้องเป็นอะไรนอกจากตัวเอง"
   }
 ]);
