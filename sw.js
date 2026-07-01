@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sap-cache-v6';
+const CACHE_NAME = 'sap-cache-v7';
 
 /* Only precache what's needed for first paint + first chapter */
 const PRECACHE = [
